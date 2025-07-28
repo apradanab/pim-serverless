@@ -1,7 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { docClient } from "./shared/db-client";
+import { docClient } from "../shared/db-client";
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   try {
