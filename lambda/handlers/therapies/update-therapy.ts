@@ -1,9 +1,7 @@
 import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { UpdateCommand } from '@aws-sdk/lib-dynamodb';
+import { docClient } from '../shared/db-client';
 
-const client = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(client);
 const TABLE_NAME = process.env.TABLE_NAME;
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
@@ -11,7 +9,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
   if (!therapyId) {
     return { statusCode: 400, body: JSON.stringify({ message: 'Missing therapy ID' })};
-  }
+  } 
   if (!event.body) {
     return { statusCode: 400, body: JSON.stringify({ message: 'Missing request boody' })};
   }
