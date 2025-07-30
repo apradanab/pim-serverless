@@ -10,6 +10,9 @@ interface ApiConstructProps {
     updateTherapy: NodejsFunction;
     deleteTherapy: NodejsFunction;
     createAdvice: NodejsFunction;
+    getAllAdvices: NodejsFunction;
+    getAdviceById: NodejsFunction;
+    getAdvicesByTherapyId: NodejsFunction;
   };
 }
 
@@ -37,7 +40,14 @@ export class ApiConstruct extends Construct {
     therapyById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateTherapy));
     therapyById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteTherapy));
 
-    const advices = therapyById.addResource('advices');
-    advices.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAdvice));
+    const therapyAdvices = therapyById.addResource('advices');
+    therapyAdvices.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAdvice));
+    therapyAdvices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAdvicesByTherapyId));
+
+    const adviceById = therapyAdvices.addResource('{adviceId}');
+    adviceById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAdviceById));
+
+    const advices = this.api.root.addResource('advices');
+    advices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAllAdvices));   
   }
 }

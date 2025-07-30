@@ -15,6 +15,9 @@ type LambdaHandlers = {
   updateTherapy: NodejsFunction;
   deleteTherapy: NodejsFunction;
   createAdvice: NodejsFunction;
+  getAllAdvices: NodejsFunction;
+  getAdviceById: NodejsFunction;
+  getAdvicesByTherapyId: NodejsFunction;
 };
 
 export class LambdaConstruct extends Construct {
@@ -39,15 +42,21 @@ export class LambdaConstruct extends Construct {
       updateTherapy: this.createHandler('UpdateTherapy', 'therapies/update-therapy.ts', commonProps),
       deleteTherapy: this.createHandler('DeleteTherapy', 'therapies/delete-therapy.ts', commonProps),
       createAdvice: this.createHandler('CreateAdvice', 'advices/create-advice.ts', commonProps),
+      getAllAdvices: this.createHandler('GetAllAdvices', 'advices/get-all-advices.ts', commonProps),
+      getAdviceById: this.createHandler('GetAdviceById', 'advices/get-advice-by-id.ts', commonProps),
+      getAdvicesByTherapyId: this.createHandler('GetAdvicesByTherapyId', 'advices/get-advices-by-therapyId.ts', commonProps),
     };
 
     const table = props.dbConstruct.dataTable;
-    table.grantReadWriteData(this.handlers.createTherapy);
+    table.grantWriteData(this.handlers.createTherapy);
     table.grantReadData(this.handlers.getAllTherapies);
     table.grantReadData(this.handlers.getTherapyById);
     table.grantReadWriteData(this.handlers.updateTherapy);
     table.grantWriteData(this.handlers.deleteTherapy);
     table.grantWriteData(this.handlers.createAdvice);
+    table.grantReadData(this.handlers.getAllAdvices); 
+    table.grantReadData(this.handlers.getAdviceById);
+    table.grantReadData(this.handlers.getAdvicesByTherapyId);
   }
 
   private createHandler(id: string, handlerFile: string, props: Partial<NodejsFunctionProps>): NodejsFunction {
