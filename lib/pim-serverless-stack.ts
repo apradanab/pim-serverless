@@ -5,8 +5,6 @@ import { LambdaConstruct } from './constructs/lambda-construct';
 import { ApiConstruct } from './constructs/api-construct';
 
 export class PimServerlessStack extends cdk.Stack {
-  
-
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 

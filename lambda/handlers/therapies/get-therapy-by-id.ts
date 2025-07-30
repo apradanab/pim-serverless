@@ -2,8 +2,6 @@ import { GetCommand } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { docClient } from '../shared/db-client';
 
-const TABLE_NAME = process.env.TABLE_NAME;
-
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
   try {
     const therapyId = event.pathParameters?.therapyId;
@@ -17,7 +15,7 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
 
     const result = await docClient.send(
       new GetCommand({
-        TableName: TABLE_NAME,
+        TableName: process.env.TABLE_NAME,
         Key: {
           PK: `THERAPY#${therapyId}`,
           SK: `THERAPY#${therapyId}`,

@@ -4,26 +4,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { docClient } from "../shared/db-client";
 
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+  const { therapyId } = event.pathParameters || {};
+  const { title, description, content, image } = JSON.parse(event.body || '{}');
+
+  if (!therapyId || !title || !description || !content) {
+    return { statusCode: 400, body: JSON.stringify({ message: 'Missing required fields' })};
+  }
+
   try {
-    if (!event.body) {
-      return { statusCode: 400, body: JSON.stringify({ message: 'Missing request body' })};
-    }
-
-    const { therapyId } = event.pathParameters || {};
-    const { title, description, content, image } = JSON.parse(event.body);
-
-    if (!therapyId || !title || !description || !content) {
-      console.log('Missing fields:', { 
-        missingTherapyId: !therapyId,
-        missingTitle: !title,
-        missingDescription: !description,
-        missingContent: !content
-      });
-      return { statusCode: 400, body: JSON.stringify({ message: 'Missing required fields' })};
-    }
-
     const adviceId = uuidv4();
-    const timeStamp = new Date().toISOString();
+    const createdAt = new Date().toISOString();
 
     await docClient.send(
       new PutCommand({
@@ -38,14 +28,14 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
           image,
           therapyId,
           adviceId,
-          createdAt: timeStamp,
+          createdAt,
         }
       })
     );
 
     return {
       statusCode: 201,
-      body: JSON.stringify({ message: 'Advice created', adviceId })
+      body: JSON.stringify({ message: 'Advice created', adviceId, therapyId })
     }
   } catch (error) {
     console.error('Error creating advice', error);

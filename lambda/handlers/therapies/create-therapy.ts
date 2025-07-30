@@ -3,19 +3,10 @@ import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import { docClient } from "../shared/db-client";
 
-const TABLE_NAME = process.env.TABLE_NAME!;
-
 export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+  const { title, description, content, image, isGroup } = JSON.parse(event.body || '{}');
+
   try {
-    if(!event.body) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Missing request body' }),
-      };
-    }
-
-    const { title, description, content, image, isGroup } = JSON.parse(event.body);
-
     if (!title || !description || !content) {
       return {
         statusCode: 400,
@@ -24,11 +15,11 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     }
 
     const therapyId = uuidv4();
-    const timeStamp = new Date().toISOString();
+    const createdAt = new Date().toISOString();
 
     await docClient.send(
       new PutCommand({
-        TableName: TABLE_NAME,
+        TableName: process.env.TABLE_NAME,
         Item: {
           PK: `THERAPY#${therapyId}`,
           SK: `THERAPY#${therapyId}`,
@@ -38,7 +29,8 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
           content,
           image,
           isGroup,
-          createdAt: timeStamp,
+          therapyId,
+          createdAt,
         }
       })
     );
