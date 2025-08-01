@@ -1,11 +1,11 @@
-import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { docClient } from '../shared/db-client';
+import { ApiResponse, success, error } from "../shared/responses";
+import { Advice } from '../shared/types/advice';
 
-export const handler: APIGatewayProxyHandlerV2 = async () => {
+export const handler = async (): Promise<ApiResponse> => {
   try {
-    const { Items } = await docClient.send(
-      new ScanCommand({
+    const result = await docClient.send(new ScanCommand({
         TableName: process.env.TABLE_NAME,
         FilterExpression: '#type = :advice',
         ExpressionAttributeNames: { '#type': 'Type' },
@@ -15,15 +15,9 @@ export const handler: APIGatewayProxyHandlerV2 = async () => {
       })
     );
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(Items || []),
-    };
-  } catch (error) {
-    console.error('Error fetching all advices:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: 'Internal Server Error' })
-    };
+    return success(result.Items as Advice[])
+  } catch (err) {
+    console.error('Error fetching all advices:', err);
+    return error(500, 'Internal Server Error');
   }
 };

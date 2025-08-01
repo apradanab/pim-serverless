@@ -13,6 +13,8 @@ interface ApiConstructProps {
     getAllAdvices: NodejsFunction;
     getAdviceById: NodejsFunction;
     getAdvicesByTherapyId: NodejsFunction;
+    updateAdvice: NodejsFunction;
+    deleteAdvice: NodejsFunction;
   };
 }
 
@@ -46,6 +48,8 @@ export class ApiConstruct extends Construct {
 
     const adviceById = therapyAdvices.addResource('{adviceId}');
     adviceById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAdviceById));
+    adviceById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateAdvice));
+    adviceById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteAdvice));
 
     const advices = this.api.root.addResource('advices');
     advices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAllAdvices));   
