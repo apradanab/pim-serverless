@@ -1,20 +1,20 @@
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
 import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { docClient } from '../shared/db-client';
+import { ApiResponse, error, success } from '../shared/responses';
+import { Therapy } from '../shared/types/therapy';
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+export const handler = async (event: {
+  pathParameters?: { therapyId?: string };
+}): Promise<ApiResponse> => {
+  const therapyId = event.pathParameters?.therapyId;
+
+  if (!therapyId) {
+    return error(400, 'Missing therapy id in path');
+  }
+
   try {
-    const therapyId = event.pathParameters?.therapyId;
-
-    if (!therapyId) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Missing therapy ID in path' }),
-      };
-    }
-
-    const result = await docClient.send(
-      new GetCommand({
+    const result = await docClient.send(new GetCommand({
         TableName: process.env.TABLE_NAME,
         Key: {
           PK: `THERAPY#${therapyId}`,
@@ -24,22 +24,12 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
     );
 
     if (!result.Item) {
-      return {
-        statusCode: 404,
-        body: JSON.stringify({ message: 'Therapy not found' }),
-      };
+      return error(404, 'Therapy Not Found');
     }
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(result.Item),
-    };
-
-  } catch (error) {
-    console.error('Error Fething therapy by ID:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: 'Internal Server Error' })
-    };
+    return success(result.Item as Therapy)
+  } catch (err) {
+    console.error('Error Fething therapy:', err);
+    return error(500, 'Internal Server Error');
   }
 };

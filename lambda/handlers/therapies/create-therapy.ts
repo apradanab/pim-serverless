@@ -1,21 +1,18 @@
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
-import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { v4 as uuidv4 } from 'uuid';
 import { docClient } from "../shared/db-client";
+import { ApiResponse, error, success } from '../shared/responses';
+import { CreateTherapyInput } from '../shared/types/therapy';
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
-  const { title, description, content, image, isGroup } = JSON.parse(event.body || '{}');
+export const handler = async (event: { body?: string; }): Promise<ApiResponse> => {
+  const input = JSON.parse(event.body || '{}') as CreateTherapyInput;
+
+  if (!input.title || !input.description || !input.content) {
+    return error(400, 'Missing required fields');
+  }
 
   try {
-    if (!title || !description || !content) {
-      return {
-        statusCode: 400,
-        body: JSON.stringify({ message: 'Missing required fields' }),
-      };
-    }
-
     const therapyId = uuidv4();
-    const createdAt = new Date().toISOString();
 
     await docClient.send(
       new PutCommand({
@@ -24,26 +21,23 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
           PK: `THERAPY#${therapyId}`,
           SK: `THERAPY#${therapyId}`,
           Type: 'Therapy',
-          title,
-          description,
-          content,
-          image,
-          isGroup,
           therapyId,
-          createdAt,
+          title: input.title,
+          description: input.description,
+          content: input.content,
+          image: input.image,
+          isGroup: input.isGroup,
+          createdAt: new Date().toISOString(),
         }
       })
     );
 
-    return {
-      statusCode: 201,
-      body: JSON.stringify({ message: 'Therapy created', therapyId }),
-    };
-  } catch(error) {
-    console.log('Error creting therapy', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: 'Inernal Server Error '}),
-    };
+    return success({ 
+      message: 'Therapy created successfully', 
+      therapyId 
+    });
+  } catch(err) {
+    console.log('Error creting therapy', err);
+    return error(500, 'Internal Server Error');
   }
 };

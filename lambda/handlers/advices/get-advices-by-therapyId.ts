@@ -1,15 +1,15 @@
-import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { docClient } from '../shared/db-client';
+import { ApiResponse, error, success } from "../shared/responses";
+import { Advice } from '../shared/types/advice';
 
-export const handler: APIGatewayProxyHandlerV2 = async (event) => {
+export const handler = async (event: {
+  pathParameters?: { therapyId?: string };
+}): Promise<ApiResponse> => {
   const { therapyId } = event.pathParameters || {};
 
   if (!therapyId) {
-    return { 
-      statusCode: 400, 
-      body: JSON.stringify({ message: 'Missing therapyId in path' }) 
-    };
+    return error(400, 'Missing therapyId in path');
   }
 
   try {
@@ -24,15 +24,9 @@ export const handler: APIGatewayProxyHandlerV2 = async (event) => {
       })
     );
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify(result.Items || [])
-    };
-  } catch (error) {
-    console.error('Error fetching advices:', error);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ message: 'Internal Server Error' })
-    };
+    return success(result.Items as Advice[]);
+  } catch (err) {
+    console.error('Error fetching advices:', err);
+    return error(500, 'Internal Server Error');
   }
 };

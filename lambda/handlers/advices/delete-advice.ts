@@ -1,7 +1,6 @@
-import { GetCommand } from "@aws-sdk/lib-dynamodb";
-import { docClient } from "../shared/db-client";
-import { ApiResponse, error, success } from "../shared/responses";
-import { Advice } from "../shared/types/advice";
+import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
+import { docClient } from '../shared/db-client';
+import { ApiResponse, error, success } from '../shared/responses';
 
 export const handler = async (event: {
   pathParameters?: { therapyId?: string; adviceId?: string };
@@ -13,7 +12,7 @@ export const handler = async (event: {
   }
 
   try {
-    const result = await docClient.send(new GetCommand({
+    await docClient.send(new DeleteCommand({
       TableName: process.env.TABLE_NAME,
       Key: {
         PK: `THERAPY#${therapyId}`,
@@ -21,13 +20,9 @@ export const handler = async (event: {
       },
     }));
 
-    if (!result.Item) {
-      return error(404, 'Advice not found');
-    }
-
-    return success(result.Item as Advice);
+    return success({ message: 'Advice deleted successfully' });
   } catch (err) {
-    console.error('Error fetching advice:', err);
+    console.error('Error deleting advice:', err);
     return error(500, 'Internal Server Error');
   }
-}
+};
