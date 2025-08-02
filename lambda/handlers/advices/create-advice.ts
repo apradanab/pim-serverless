@@ -4,7 +4,7 @@ import { ApiResponse, error, success } from "../shared/responses";
 import { Advice, CreateAdviceInput } from '../shared/types/advice';
 import { v4 as uuidv4 } from 'uuid';
 
-export const handler = async (event: { 
+export const handler = async (event: {
   pathParameters?: { therapyId?: string };
   body?: string;
 }): Promise<ApiResponse> => {
@@ -35,7 +35,7 @@ export const handler = async (event: {
       Item: newAdvice,
     }));
 
-    return success({ 
+    return success({
       message: 'Advice created successfully',
       data: {
         adviceId,

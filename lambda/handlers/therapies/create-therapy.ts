@@ -32,12 +32,12 @@ export const handler = async (event: { body?: string; }): Promise<ApiResponse> =
       })
     );
 
-    return success({ 
-      message: 'Therapy created successfully', 
-      therapyId 
+    return success({
+      message: 'Therapy created successfully',
+      therapyId
     });
   } catch(err) {
-    console.log('Error creting therapy', err);
+    console.error('Error creting therapy', err);
     return error(500, 'Internal Server Error');
   }
 };

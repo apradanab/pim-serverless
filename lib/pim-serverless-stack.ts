@@ -10,7 +10,7 @@ export class PimServerlessStack extends cdk.Stack {
 
     const dbConstruct = new DynamoDBConstruct(this, 'DynamoDB');
     const lambdaConstruct = new LambdaConstruct(this, 'Lambda', { dbConstruct });
-    const apiConstruct = new ApiConstruct(this, 'PimApi', {
+    const _apiConstruct = new ApiConstruct(this, 'PimApi', {
       lambdaHandlers: lambdaConstruct.handlers
      });
    }

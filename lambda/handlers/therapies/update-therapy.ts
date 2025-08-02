@@ -3,7 +3,7 @@ import { docClient } from '../shared/db-client';
 import { ApiResponse, success, error } from '../shared/responses';
 import { UpdateTherapyInput } from '../shared/types/therapy';
 
-export const handler = async (event: { 
+export const handler = async (event: {
   pathParameters?: { therapyId?: string };
   body?: string;
 }): Promise<ApiResponse> => {
@@ -15,7 +15,7 @@ export const handler = async (event: {
 
   try {
     const updateExpression = `SET ${fieldsToUpdate.map(field => `#${field} = :${field}`).join(', ')}`;
-    
+
     const expressionAttributeNames = fieldsToUpdate.reduce(
       (acc, field) => ({ ...acc, [`#${field}`]: field }),
       {}

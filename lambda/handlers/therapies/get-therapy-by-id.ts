@@ -1,5 +1,4 @@
 import { GetCommand } from '@aws-sdk/lib-dynamodb';
-import { APIGatewayProxyHandlerV2 } from 'aws-lambda';
 import { docClient } from '../shared/db-client';
 import { ApiResponse, error, success } from '../shared/responses';
 import { Therapy } from '../shared/types/therapy';
