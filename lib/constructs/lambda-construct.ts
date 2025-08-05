@@ -3,9 +3,11 @@ import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-node
 import * as path from 'path';
 import { Construct } from 'constructs';
 import { DynamoDBConstruct } from './dynamodb-construct';
+import { MediaBucket } from './storage/media-bucket';
 
 interface LambdaConstructProps {
   dbConstruct: DynamoDBConstruct;
+  storageConstruct: MediaBucket;
 }
 
 type LambdaHandlers = {
@@ -20,6 +22,8 @@ type LambdaHandlers = {
   getAdvicesByTherapyId: NodejsFunction;
   updateAdvice: NodejsFunction;
   deleteAdvice: NodejsFunction;
+  createAppointment: NodejsFunction;
+  mediaUpload: NodejsFunction;
 };
 
 export class LambdaConstruct extends Construct {
@@ -30,6 +34,8 @@ export class LambdaConstruct extends Construct {
 
     const commonEnv = {
       TABLE_NAME: props.dbConstruct.dataTable.tableName,
+      BUCKET_NAME: props.storageConstruct.bucket.bucketName,
+      CDN_DOMAIN: props.storageConstruct.distribution.distributionDomainName
     }
 
     const commonProps = {
@@ -49,6 +55,8 @@ export class LambdaConstruct extends Construct {
       getAdvicesByTherapyId: this.createHandler('GetAdvicesByTherapyId', 'advices/get-advices-by-therapyId.ts', commonProps),
       updateAdvice: this.createHandler('UpdateAdvice', 'advices/update-advice.ts', commonProps),
       deleteAdvice: this.createHandler('DeleteAdvice', 'advices/delete-advice.ts', commonProps),
+      createAppointment: this.createHandler('CreateAppointment', 'appointments/create-appointment.ts', commonProps),
+      mediaUpload: this.createHandler('MediaUpload', 'core/media-upload.ts', commonProps)
     };
 
     const table = props.dbConstruct.dataTable;
@@ -58,14 +66,21 @@ export class LambdaConstruct extends Construct {
     table.grantReadWriteData(this.handlers.updateTherapy);
     table.grantWriteData(this.handlers.deleteTherapy);
     table.grantWriteData(this.handlers.createAdvice);
-    table.grantReadData(this.handlers.getAllAdvices); 
+    table.grantReadData(this.handlers.getAllAdvices);
     table.grantReadData(this.handlers.getAdviceById);
     table.grantReadData(this.handlers.getAdvicesByTherapyId);
     table.grantReadWriteData(this.handlers.updateAdvice);
     table.grantWriteData(this.handlers.deleteAdvice);
+    table.grantWriteData(this.handlers.createAppointment);
+
+    props.storageConstruct.bucket.grantPut(this.handlers.mediaUpload);
   }
 
-  private createHandler(id: string, handlerFile: string, props: Partial<NodejsFunctionProps>): NodejsFunction {
+  private createHandler(
+    id: string,
+    handlerFile: string,
+    props: Partial<NodejsFunctionProps>
+  ): NodejsFunction {
     return new NodejsFunction(this, id, {
       ...props,
       entry: path.join(__dirname, '..', '..', 'lambda', 'handlers', handlerFile),
