@@ -15,6 +15,8 @@ interface ApiConstructProps {
     getAdvicesByTherapyId: NodejsFunction;
     updateAdvice: NodejsFunction;
     deleteAdvice: NodejsFunction;
+    createAppointment: NodejsFunction;
+    mediaUpload: NodejsFunction;
   };
 }
 
@@ -26,7 +28,7 @@ export class ApiConstruct extends Construct {
 
     this.api = new apigateway.RestApi(this, 'PimApi', {
       restApiName: 'PIM Service',
-      description: 'Therapy and Advice management API',
+      description: 'Therapy, Advice, and Appointments management API',
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
@@ -52,6 +54,15 @@ export class ApiConstruct extends Construct {
     adviceById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteAdvice));
 
     const advices = this.api.root.addResource('advices');
-    advices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAllAdvices));   
+    advices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAllAdvices));
+
+    const therapyAppointments = therapyById.addResource('appointments');
+    therapyAppointments.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAppointment));
+
+    const media = this.api.root.addResource('media');
+    const mediaType = media.addResource('{type}');
+    const mediaTypeAndId = mediaType.addResource('{id}');
+    mediaTypeAndId.addMethod('PUT', new apigateway.LambdaIntegration(props.lambdaHandlers.mediaUpload))
+
   }
 }
