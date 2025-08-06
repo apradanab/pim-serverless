@@ -1,8 +1,8 @@
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-import { docClient } from "../shared/db-client";
-import { ApiResponse, error, success } from '../shared/responses';
-import { CreateTherapyInput } from '../shared/types/therapy';
+import { docClient } from "../handlers/shared/db-client";
+import { ApiResponse, error, success } from '../handlers/shared/responses';
+import { CreateTherapyInput } from '../handlers/shared/types/therapy';
 
 export const handler = async (event: { body?: string; }): Promise<ApiResponse> => {
   const input = JSON.parse(event.body || '{}') as CreateTherapyInput;

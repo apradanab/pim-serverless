@@ -1,7 +1,7 @@
 import { QueryCommand } from '@aws-sdk/lib-dynamodb';
-import { docClient } from '../shared/db-client';
-import { ApiResponse, error, success } from "../shared/responses";
-import { Advice } from '../shared/types/advice';
+import { docClient } from '../handlers/shared/db-client';
+import { ApiResponse, error, success } from "../handlers/shared/responses";
+import { Advice } from '../handlers/shared/types/advice';
 
 export const handler = async (event: {
   pathParameters?: { therapyId?: string };

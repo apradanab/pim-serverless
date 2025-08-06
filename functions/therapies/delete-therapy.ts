@@ -1,6 +1,6 @@
 import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
-import { docClient } from '../shared/db-client';
-import { ApiResponse, error, success } from '../shared/responses';
+import { docClient } from '../handlers/shared/db-client';
+import { ApiResponse, error, success } from '../handlers/shared/responses';
 
 export const handler = async (event: {
   pathParameters?: { therapyId?: string };
@@ -14,8 +14,8 @@ export const handler = async (event: {
   try {
     await docClient.send(new DeleteCommand({
       TableName: process.env.TABLE_NAME,
-      Key: { 
-        PK: `THERAPY#${therapyId}`, 
+      Key: {
+        PK: `THERAPY#${therapyId}`,
         SK: `THERAPY#${therapyId}`
       },
     }));

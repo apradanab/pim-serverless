@@ -1,8 +1,8 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { DynamoDBConstruct } from './constructs/dynamodb-construct';
+import { DynamoDBConstruct } from './constructs/data/dynamodb-construct';
 import { LambdaConstruct } from './constructs/lambda-construct';
-import { ApiConstruct } from './constructs/api-construct';
+import { ApiConstruct } from './constructs/api/rest-api';
 import { MediaBucket } from './constructs/storage/media-bucket';
 
 export class PimServerlessStack extends cdk.Stack {
