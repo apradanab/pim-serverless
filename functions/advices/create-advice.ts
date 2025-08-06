@@ -1,7 +1,7 @@
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
-import { docClient } from '../shared/db-client';
-import { ApiResponse, error, success } from "../shared/responses";
-import { Advice, CreateAdviceInput } from '../shared/types/advice';
+import { docClient } from '../handlers/shared/db-client';
+import { ApiResponse, error, success } from "../handlers/shared/responses";
+import { Advice, CreateAdviceInput } from '../handlers/shared/types/advice';
 import { v4 as uuidv4 } from 'uuid';
 
 export const handler = async (event: {
@@ -26,7 +26,7 @@ export const handler = async (event: {
       title: input.title,
       description: input.description,
       content: input.content,
-      image: input.image,
+      imageKey: input.imageKey,
       createdAt: new Date().toISOString(),
     };
 

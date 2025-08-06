@@ -1,7 +1,7 @@
 import { ScanCommand } from '@aws-sdk/lib-dynamodb';
-import { docClient } from '../shared/db-client';
-import { ApiResponse, success, error } from "../shared/responses";
-import { Advice } from '../shared/types/advice';
+import { docClient } from '../handlers/shared/db-client';
+import { ApiResponse, success, error } from "../handlers/shared/responses";
+import { Advice } from '../handlers/shared/types/advice';
 
 export const handler = async (): Promise<ApiResponse> => {
   try {

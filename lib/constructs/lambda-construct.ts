@@ -2,7 +2,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
 import { Construct } from 'constructs';
-import { DynamoDBConstruct } from './dynamodb-construct';
+import { DynamoDBConstruct } from './data/dynamodb-construct';
 import { MediaBucket } from './storage/media-bucket';
 
 interface LambdaConstructProps {

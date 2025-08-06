@@ -7,7 +7,7 @@ export interface Advice {
   title: string;
   description: string;
   content: string;
-  image?: string;
+  imageKey?: string;
   createdAt: string;
 }
 
@@ -15,12 +15,12 @@ export interface CreateAdviceInput {
   title: string;
   description: string;
   content: string;
-  image?: string;
+  imageKey?: string;
 }
 
 export interface UpdateAdviceInput {
   title?: string;
   description?: string;
   content?: string;
-  image?: string;
+  imageKey?: string;
 }
