@@ -14,5 +14,11 @@ export class DynamoDBConstruct extends Construct {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
       removalPolicy: cdk.RemovalPolicy.DESTROY,
     });
+
+    this.dataTable.addGlobalSecondaryIndex({
+      indexName: 'TypeIndex',
+      partitionKey: { name: 'Type', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL
+    });
   }
 }
