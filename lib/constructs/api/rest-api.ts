@@ -5,14 +5,14 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 interface ApiConstructProps {
   lambdaHandlers: {
     createTherapy: NodejsFunction;
-    getAllTherapies: NodejsFunction;
-    getTherapyById: NodejsFunction;
+    listTherapies: NodejsFunction;
+    getTherapy: NodejsFunction;
     updateTherapy: NodejsFunction;
     deleteTherapy: NodejsFunction;
     createAdvice: NodejsFunction;
-    getAllAdvices: NodejsFunction;
-    getAdviceById: NodejsFunction;
-    getAdvicesByTherapyId: NodejsFunction;
+    listAdvices: NodejsFunction;
+    getAdvice: NodejsFunction;
+    listAdvicesByTherapy: NodejsFunction;
     updateAdvice: NodejsFunction;
     deleteAdvice: NodejsFunction;
     createAppointment: NodejsFunction;
@@ -36,25 +36,25 @@ export class ApiConstruct extends Construct {
     });
 
     const therapies = this.api.root.addResource('therapies');
-    therapies.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAllTherapies));
+    therapies.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listTherapies));
     therapies.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createTherapy));
 
     const therapyById = therapies.addResource('{therapyId}');
-    therapyById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getTherapyById));
+    therapyById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getTherapy));
     therapyById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateTherapy));
     therapyById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteTherapy));
 
     const therapyAdvices = therapyById.addResource('advices');
     therapyAdvices.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAdvice));
-    therapyAdvices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAdvicesByTherapyId));
+    therapyAdvices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listAdvicesByTherapy));
 
     const adviceById = therapyAdvices.addResource('{adviceId}');
-    adviceById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAdviceById));
+    adviceById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAdvice));
     adviceById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateAdvice));
     adviceById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteAdvice));
 
     const advices = this.api.root.addResource('advices');
-    advices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAllAdvices));
+    advices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listAdvices));
 
     const therapyAppointments = therapyById.addResource('appointments');
     therapyAppointments.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAppointment));
