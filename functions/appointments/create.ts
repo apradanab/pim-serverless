@@ -1,8 +1,7 @@
 import { PutCommand } from '@aws-sdk/lib-dynamodb';
-import { ApiResponse, success, error } from '../shared/responses';
+import { ApiResponse, docClient, error, success } from '../shared/dynamo';
 import { v4 as uuidv4 } from 'uuid';
 import { CreateAppointmentInput } from '../shared/types/appointment';
-import { docClient } from '../shared/db-client';
 
 export const handler = async (event: {
   pathParameters?: { therapyId?: string },

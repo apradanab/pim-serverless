@@ -1,6 +1,7 @@
-import { DeleteCommand } from '@aws-sdk/lib-dynamodb';
-import { docClient } from '../handlers/shared/db-client';
-import { ApiResponse, error, success } from '../handlers/shared/responses';
+import { DatabaseService } from '../../lib/constructs/services/database-service';
+import { ApiResponse, error, success } from '../shared/dynamo';
+
+const dbService = new DatabaseService(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
   pathParameters?: { therapyId?: string };
@@ -12,14 +13,7 @@ export const handler = async (event: {
   }
 
   try {
-    await docClient.send(new DeleteCommand({
-      TableName: process.env.TABLE_NAME,
-      Key: {
-        PK: `THERAPY#${therapyId}`,
-        SK: `THERAPY#${therapyId}`
-      },
-    }));
-
+    await dbService.deleteItem(`THERAPY#${therapyId}`, `THERAPY#${therapyId}`);
     return success({ message: 'Therapy deleted successfully' });
   } catch (err) {
     console.error('Error deleting therapy:', err);
