@@ -1,11 +1,9 @@
-import { Bucket } from 'aws-cdk-lib/aws-s3';
-import { Distribution } from 'aws-cdk-lib/aws-cloudfront';
-import { S3Client, PutObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3';
+import { S3Client, PutObjectCommand, HeadObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 interface MediaConfig {
-  bucket: Bucket;
-  distribution: Distribution;
+  bucketName: string;
+  distributionDomainName: string;
   allowedTypes: Record<string, string>;
   maxSizeMB: number;
 }
@@ -37,7 +35,7 @@ export class MediaService {
     const uploadUrl = await getSignedUrl(
       this.s3,
       new PutObjectCommand({
-        Bucket: this.config.bucket.bucketName,
+        Bucket: this.config.bucketName,
         Key: key,
         ContentType: contentType,
       }),
@@ -46,14 +44,14 @@ export class MediaService {
 
     return {
       uploadUrl,
-      publicUrl: `https://${this.config.distribution.distributionDomainName}/${key}`,
+      publicUrl: `https://${this.config.distributionDomainName}/${key}`,
       key,
     };
   }
 
   async getMediaMetadata(key: string) {
     const data = await this.s3.send(new HeadObjectCommand({
-      Bucket: this.config.bucket.bucketName,
+      Bucket: this.config.bucketName,
       Key: key,
     }));
 
@@ -62,5 +60,17 @@ export class MediaService {
       contentType: data.ContentType,
       lastModified: data.LastModified,
     };
+  }
+
+  async deleteMedia(key: string) {
+    try {
+      await this.s3.send(new DeleteObjectCommand({
+        Bucket: this.config.bucketName,
+        Key: key,
+      }));
+    } catch (error) {
+      console.error(`Failed to delete media with key ${key}`, error);
+      throw error;
+    }
   }
 }
