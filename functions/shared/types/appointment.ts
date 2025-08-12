@@ -1,4 +1,6 @@
-export interface Appointment {
+import { DynamoItem } from "../dynamo";
+
+export interface Appointment extends DynamoItem {
   PK: string;
   SK: string;
   Type: 'Appointment';
@@ -25,7 +27,7 @@ export interface CreateAppointmentInput {
   notes?: string;
 }
 
-export interface UpdateAppointmentInput {
+export interface UpdateAppointmentInput extends Partial<Appointment> {
   date?: string;
   startTime?: string;
   endTime?: string;
