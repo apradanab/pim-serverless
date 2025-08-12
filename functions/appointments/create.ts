@@ -1,7 +1,9 @@
-import { PutCommand } from '@aws-sdk/lib-dynamodb';
-import { ApiResponse, docClient, error, success } from '../shared/dynamo';
+import { ApiResponse, error, success } from '../shared/dynamo';
 import { v4 as uuidv4 } from 'uuid';
-import { CreateAppointmentInput } from '../shared/types/appointment';
+import { Appointment, CreateAppointmentInput } from '../shared/types/appointment';
+import { DatabaseService } from '../../lib/constructs/services/database-service';
+
+const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
   pathParameters?: { therapyId?: string },
@@ -10,37 +12,36 @@ export const handler = async (event: {
   const therapyId = event.pathParameters?.therapyId;
   const input = JSON.parse(event.body || '{}') as CreateAppointmentInput;
 
-  if (!input.date || !input.startTime || !input.endTime) {
+  if (!therapyId || !input.date || !input.startTime || !input.endTime) {
     return error(400, 'Missing required fields');
   }
 
   try {
     const appointmentId = uuidv4();
+    const newAppointment: Appointment = {
+      PK: `THERAPY#${therapyId}`,
+      SK: `APPOINTMENT#${appointmentId}`,
+      Type: 'Appointment',
+      GSI1PK: `APPOINTMENT#${appointmentId}`,
+      GSI1SK: `DATE#${input.date}`,
+      appointmentId,
+      therapyId,
+      date: input.date,
+      startTime: input.startTime,
+      endTime: input.endTime,
+      status: 'AVAILABLE',
+      notes: input.notes,
+      createdAt: new Date().toISOString(),
+    };
 
-    await docClient.send(
-      new PutCommand({
-        TableName: process.env.TABLE_NAME,
-        Item: {
-          PK: `APPOINTMENT#${appointmentId}`,
-          SK: `APPOINTMENT#${appointmentId}`,
-          Type: 'Appointment',
-          GSI1PK: `THERAPY#${therapyId}`,
-          GSI1SK: `DATE#${input.date}T${input.startTime}`,
-          appointmentId,
-          therapyId,
-          date: input.date,
-          startTime: input.startTime,
-          endTime: input.endTime,
-          status: 'AVAILABLE',
-          notes: input.notes,
-          createdAt: new Date().toISOString(),
-        }
-      })
-    )
+    await dbService.createItem(newAppointment);
 
     return success({
       message: 'Appointment created successfully',
-      appointmentId
+      data: {
+        appointmentId,
+        therapyId,
+      },
     });
   } catch (err) {
     console.error('Error creating appointment', err);
