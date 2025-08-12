@@ -25,7 +25,11 @@ type LambdaHandlers = {
   deleteAdvice: NodejsFunction;
 
   createAppointment: NodejsFunction;
-  
+  listAppointments: NodejsFunction;
+  getAppointment: NodejsFunction;
+  updateAppointment: NodejsFunction;
+  deleteAppointment: NodejsFunction;
+
   mediaUpload: NodejsFunction;
 };
 
@@ -52,13 +56,20 @@ export class LambdaConstruct extends Construct {
       getTherapy: this.createHandler('GetTherapy', 'therapies/get.ts', commonProps),
       updateTherapy: this.createHandler('UpdateTherapy', 'therapies/update.ts', commonProps),
       deleteTherapy: this.createHandler('DeleteTherapy', 'therapies/delete.ts', commonProps),
+
       createAdvice: this.createHandler('CreateAdvice', 'advices/create.ts', commonProps),
       listAdvices: this.createHandler('ListAdvices', 'advices/list.ts', commonProps),
       getAdvice: this.createHandler('GetAdvice', 'advices/get.ts', commonProps),
       listAdvicesByTherapy: this.createHandler('ListAdvicesByTherapy', 'advices/list-by-therapy.ts', commonProps),
       updateAdvice: this.createHandler('UpdateAdvice', 'advices/update.ts', commonProps),
       deleteAdvice: this.createHandler('DeleteAdvice', 'advices/delete.ts', commonProps),
+
       createAppointment: this.createHandler('CreateAppointment', 'appointments/create.ts', commonProps),
+      listAppointments: this.createHandler('ListAppointments', 'appointments/list.ts', commonProps),
+      getAppointment: this.createHandler('GetAppointment', 'appointments/get.ts', commonProps),
+      updateAppointment: this.createHandler('UpdateAppointment', 'appointments/update.ts', commonProps),
+      deleteAppointment: this.createHandler('DeleteAppointment', 'appointments/delete.ts', commonProps),
+
       mediaUpload: this.createHandler('MediaUpload', 'core/media-upload.ts', commonProps)
     };
 
@@ -68,13 +79,19 @@ export class LambdaConstruct extends Construct {
     table.grantReadData(this.handlers.getTherapy);
     table.grantReadWriteData(this.handlers.updateTherapy);
     table.grantWriteData(this.handlers.deleteTherapy);
+
     table.grantWriteData(this.handlers.createAdvice);
     table.grantReadData(this.handlers.listAdvices);
     table.grantReadData(this.handlers.getAdvice);
     table.grantReadData(this.handlers.listAdvicesByTherapy);
     table.grantReadWriteData(this.handlers.updateAdvice);
     table.grantWriteData(this.handlers.deleteAdvice);
+
     table.grantWriteData(this.handlers.createAppointment);
+    table.grantReadData(this.handlers.listAppointments);
+    table.grantReadData(this.handlers.getAppointment);
+    table.grantReadWriteData(this.handlers.updateAppointment);
+    table.grantWriteData(this.handlers.deleteAppointment);
 
     props.storageConstruct.bucket.grantPut(this.handlers.mediaUpload);
   }

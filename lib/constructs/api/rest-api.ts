@@ -9,13 +9,20 @@ interface ApiConstructProps {
     getTherapy: NodejsFunction;
     updateTherapy: NodejsFunction;
     deleteTherapy: NodejsFunction;
+
     createAdvice: NodejsFunction;
     listAdvices: NodejsFunction;
     getAdvice: NodejsFunction;
     listAdvicesByTherapy: NodejsFunction;
     updateAdvice: NodejsFunction;
     deleteAdvice: NodejsFunction;
+
     createAppointment: NodejsFunction;
+    listAppointments: NodejsFunction;
+    getAppointment: NodejsFunction;
+    updateAppointment: NodejsFunction;
+    deleteAppointment: NodejsFunction;
+
     mediaUpload: NodejsFunction;
   };
 }
@@ -58,6 +65,14 @@ export class ApiConstruct extends Construct {
 
     const therapyAppointments = therapyById.addResource('appointments');
     therapyAppointments.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAppointment));
+
+    const appointmentById = therapyAppointments.addResource('{appointmentId}');
+    appointmentById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAppointment));
+    appointmentById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateAppointment));
+    appointmentById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteAppointment));
+
+    const appointments = this.api.root.addResource('appointments');
+    appointments.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listAppointments));
 
     const media = this.api.root.addResource('media');
     const mediaType = media.addResource('{type}');
