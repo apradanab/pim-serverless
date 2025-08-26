@@ -6,7 +6,7 @@ import { ApiResponse, error, success } from '../shared/dynamo';
 
 const dbService = new DatabaseService<Advice>(process.env.TABLE_NAME!);
 const mediaService = new MediaService({
-  bucketName: process.env.MEDIA_BUCKET!,
+  bucketName: process.env.BUCKET_NAME!,
   distributionDomainName: process.env.CDN_DOMAIN!,
   allowedTypes: {
     'image/jpeg': 'jpg',
@@ -63,7 +63,8 @@ export const handler = async (event: {
   } catch (err) {
     console.error('Error creating advice:', err);
     if (input.imageKey) {
-      await mediaService.deleteMedia(input.imageKey)
+      await mediaService
+        .deleteMedia(input.imageKey)
         .catch(e => console.error('Failed to cleanup image:', e));
     }
     return error(500, 'Internal Server Error');
