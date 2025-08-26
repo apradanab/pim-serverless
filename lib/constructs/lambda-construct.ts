@@ -94,6 +94,15 @@ export class LambdaConstruct extends Construct {
     table.grantWriteData(this.handlers.deleteAppointment);
 
     props.storageConstruct.bucket.grantPut(this.handlers.mediaUpload);
+    props.storageConstruct.bucket.grantRead(this.handlers.createTherapy);
+    props.storageConstruct.bucket.grantDelete(this.handlers.createTherapy);
+    props.storageConstruct.bucket.grantRead(this.handlers.updateTherapy);
+    props.storageConstruct.bucket.grantDelete(this.handlers.updateTherapy);
+
+    props.storageConstruct.bucket.grantRead(this.handlers.createAdvice);
+    props.storageConstruct.bucket.grantDelete(this.handlers.createAdvice);
+    props.storageConstruct.bucket.grantRead(this.handlers.updateAdvice);
+    props.storageConstruct.bucket.grantDelete(this.handlers.updateAdvice);
   }
 
   private createHandler(
