@@ -13,26 +13,21 @@ export class MediaBucket extends Construct {
 
     this.bucket = new s3.Bucket(this, 'MediaBucket', {
       cors: [{
-        allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.GET],
+        allowedMethods: [s3.HttpMethods.PUT, s3.HttpMethods.GET, s3.HttpMethods.HEAD],
         allowedOrigins: ['*'],
         allowedHeaders: ['*']
       }],
       lifecycleRules: [{
         abortIncompleteMultipartUploadAfter: Duration.days(1),
         expiration: Duration.days(365)
-      }]
-    });
-
-    const originAccessControl = new cloudfront.S3OriginAccessControl(this, 'MediaBucketOAC', {
-      originAccessControlName: 'PIM-OAC',
-      signing: cloudfront.Signing.SIGV4_ALWAYS
+      }],
+      blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
+      enforceSSL: true,
     });
 
     this.distribution = new cloudfront.Distribution(this, 'MediaCDN', {
       defaultBehavior: {
-        origin: origins.S3BucketOrigin.withOriginAccessControl(this.bucket, {
-          originAccessControl: originAccessControl
-        }),
+        origin: origins.S3BucketOrigin.withOriginAccessControl(this.bucket),
         cachePolicy: cloudfront.CachePolicy.CACHING_OPTIMIZED,
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS
       }
