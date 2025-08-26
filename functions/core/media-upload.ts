@@ -15,7 +15,7 @@ export const handler = async (event: {
 }): Promise<ApiResponse> => {
   const { id, type } = event.pathParameters || {};
   const contentType = event.queryStringParameters?.contentType;
-  const allowedTypes = ['image/jpg', 'image/png', 'image/webp', 'image/svg',]
+  const allowedTypes = ['image/jpg', 'image/jpeg', 'image/png', 'image/webp', 'image/svg',]
 
   if (!id || !type || !contentType) {
     return error(400, 'Missing required parameters');
