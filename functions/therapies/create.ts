@@ -6,7 +6,7 @@ import { ApiResponse, error, success } from '../shared/dynamo';
 
 const dbService = new DatabaseService<Therapy>(process.env.TABLE_NAME!);
 const mediaService = new MediaService({
-  bucketName: process.env.MEDIA_BUCKET!,
+  bucketName: process.env.BUCKET_NAME!,
   distributionDomainName: process.env.CDN_DOMAIN!,
   allowedTypes: {
     'image/jpeg': 'jpg',
