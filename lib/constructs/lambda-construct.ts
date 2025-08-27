@@ -4,10 +4,12 @@ import * as path from 'path';
 import { Construct } from 'constructs';
 import { DynamoDBConstruct } from './data/dynamodb-construct';
 import { MediaBucket } from './storage/media-bucket';
+import { CognitoConstruct } from './auth/cognito-construct';
 
 interface LambdaConstructProps {
   dbConstruct: DynamoDBConstruct;
   storageConstruct: MediaBucket;
+  authConstruct: CognitoConstruct;
 }
 
 type LambdaHandlers = {
