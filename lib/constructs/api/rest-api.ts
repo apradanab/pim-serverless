@@ -1,5 +1,6 @@
 import { Construct } from 'constructs';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
+import * as cognito from 'aws-cdk-lib/aws-cognito';
 import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
 interface ApiConstructProps {
@@ -25,6 +26,9 @@ interface ApiConstructProps {
 
     mediaUpload: NodejsFunction;
   };
+  authConstruct: {
+    userPool: cognito.UserPool;
+  }
 }
 
 export class ApiConstruct extends Construct {
