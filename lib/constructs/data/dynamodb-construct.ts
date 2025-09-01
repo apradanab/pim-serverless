@@ -20,5 +20,11 @@ export class DynamoDBConstruct extends Construct {
       partitionKey: { name: 'Type', type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL
     });
+
+    this.dataTable.addGlobalSecondaryIndex({
+      indexName: 'EmailIndex',
+      partitionKey: { name: 'email', type: dynamodb.AttributeType.STRING },
+      projectionType: dynamodb.ProjectionType.ALL
+    });
   }
 }
