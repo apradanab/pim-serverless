@@ -88,4 +88,20 @@ export class DatabaseService<T extends DynamoItem> {
 
     return (result.Items || [])as T[];
   }
+
+  async queryByEmail(email: string): Promise<T[]> {
+    const result = await this.docClient.send(new QueryCommand({
+      TableName: this.tableName,
+      IndexName: 'EmailIndex',
+      KeyConditionExpression: '#email = :email',
+      ExpressionAttributeNames: {
+        '#email': 'email'
+      },
+      ExpressionAttributeValues: {
+        ':email': email
+      }
+    }));
+
+    return (result.Items || []) as T[];
+  }
 }
