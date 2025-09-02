@@ -1,4 +1,4 @@
-import { DynamoItem } from "../dynamo";
+import { DynamoItem } from '../dynamo';
 
 export interface User extends DynamoItem {
   PK: string;
