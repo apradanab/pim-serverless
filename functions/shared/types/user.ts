@@ -5,7 +5,7 @@ export interface User extends DynamoItem {
   SK: string;
   Type: 'User';
   userId: string;
-  cognitoId: string;
+  cognitoId?: string;
   name: string;
   email: string;
   role: 'GUEST' | 'USER' | 'ADMIN';
@@ -33,15 +33,4 @@ export interface UpdateUserInput {
 export interface LoginInput {
   email: string;
   password: string;
-}
-
-export interface AuthResponse {
-  token: string;
-  user: {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    approved: boolean;
-  };
 }
