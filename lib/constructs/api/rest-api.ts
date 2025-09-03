@@ -24,6 +24,9 @@ interface ApiConstructProps {
     updateAppointment: NodejsFunction;
     deleteAppointment: NodejsFunction;
 
+    createUser: NodejsFunction;
+    // loginUser: NodejsFunction;
+
     mediaUpload: NodejsFunction;
   };
   authConstruct: {
@@ -81,7 +84,10 @@ export class ApiConstruct extends Construct {
     const media = this.api.root.addResource('media');
     const mediaType = media.addResource('{type}');
     const mediaTypeAndId = mediaType.addResource('{id}');
-    mediaTypeAndId.addMethod('PUT', new apigateway.LambdaIntegration(props.lambdaHandlers.mediaUpload))
+    mediaTypeAndId.addMethod('PUT', new apigateway.LambdaIntegration(props.lambdaHandlers.mediaUpload));
 
+    const auth = this.api.root.addResource('auth');
+    // auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.loginUser));
+    auth.addResource('register').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createUser));
   }
 }
