@@ -1,6 +1,7 @@
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
+import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { DynamoDBConstruct } from './data/dynamodb-construct';
 import { MediaBucket } from './storage/media-bucket';
@@ -32,6 +33,9 @@ type LambdaHandlers = {
   updateAppointment: NodejsFunction;
   deleteAppointment: NodejsFunction;
 
+  createUser: NodejsFunction;
+  // loginUser: NodejsFunction;
+
   mediaUpload: NodejsFunction;
 };
 
@@ -44,7 +48,10 @@ export class LambdaConstruct extends Construct {
     const commonEnv = {
       TABLE_NAME: props.dbConstruct.dataTable.tableName,
       BUCKET_NAME: props.storageConstruct.bucket.bucketName,
-      CDN_DOMAIN: props.storageConstruct.distribution.distributionDomainName
+      CDN_DOMAIN: props.storageConstruct.distribution.distributionDomainName,
+      USER_POOL_ID: props.authConstruct.userPool.userPoolId,
+      USER_POOL_CLIENT_ID: props.authConstruct.userPoolClient.userPoolClientId,
+      REGION: cdk.Stack.of(this).region,
     }
 
     const commonProps = {
@@ -72,6 +79,9 @@ export class LambdaConstruct extends Construct {
       updateAppointment: this.createHandler('UpdateAppointment', 'appointments/update.ts', commonProps),
       deleteAppointment: this.createHandler('DeleteAppointment', 'appointments/delete.ts', commonProps),
 
+      createUser: this.createHandler('CreateUser', 'users/create.ts', commonProps),
+      // loginUser: this.createHandler('LoginUser', 'users/login.ts', commonProps),
+
       mediaUpload: this.createHandler('MediaUpload', 'core/media-upload.ts', commonProps)
     };
 
@@ -94,6 +104,14 @@ export class LambdaConstruct extends Construct {
     table.grantReadData(this.handlers.getAppointment);
     table.grantReadWriteData(this.handlers.updateAppointment);
     table.grantWriteData(this.handlers.deleteAppointment);
+
+    table.grantWriteData(this.handlers.createUser);
+    table.grantReadData(this.handlers.createUser);
+    // table.grantReadData(this.handlers.loginUser);
+    // props.authConstruct.userPool.grant(
+    //   this.handlers.loginUser,
+    //   'cognito-idp:AdminInitiateAuth'
+    // );
 
     props.storageConstruct.bucket.grantPut(this.handlers.mediaUpload);
     props.storageConstruct.bucket.grantRead(this.handlers.createTherapy);
