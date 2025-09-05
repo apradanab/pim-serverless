@@ -11,6 +11,8 @@ export interface User extends DynamoItem {
   role: 'GUEST' | 'USER' | 'ADMIN';
   approved: boolean;
   message?: string;
+  password?: string;
+  registrationToken?: string;
   avatar?: string;
   createdAt: string;
 }
