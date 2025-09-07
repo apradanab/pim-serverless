@@ -12,7 +12,7 @@ export class EmailService {
     this.ses = new SESClient({ region: this.config.region });
   }
 
-  async sendApprovalEmail(to: string, name: string, token: string): Promise<void> {
+  async sendApprovalEmail(to: string, name: string, token: string) {
     const domain = process.env.APP_DOMAIN || 'http://localhost:3000';
     const link = `${domain}/complete-register?token=${token}`;
 
