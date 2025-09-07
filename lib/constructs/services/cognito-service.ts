@@ -3,6 +3,10 @@ import {
   AdminInitiateAuthCommand,
   AdminInitiateAuthCommandOutput,
   AdminInitiateAuthCommandInput,
+  AdminCreateUserCommand,
+  AdminCreateUserCommandInput,
+  AdminSetUserPasswordCommandInput,
+  AdminSetUserPasswordCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 
 interface CognitoConfig {
@@ -32,7 +36,6 @@ export class CognitoService {
     };
 
     const command = new AdminInitiateAuthCommand(input)
-
     const response: AdminInitiateAuthCommandOutput = await this.client.send(command);
 
     const token = response.AuthenticationResult?.IdToken;
@@ -41,5 +44,33 @@ export class CognitoService {
     }
 
     return token;
+  }
+
+  async asignInitialPassword(email: string, password: string) {
+    const input: AdminCreateUserCommandInput = {
+      UserPoolId: this.config.userPoolId,
+      Username: email,
+      TemporaryPassword: password,
+      MessageAction: 'SUPPRESS',
+      UserAttributes: [
+        { Name: 'email', Value: email },
+        { Name: 'email_verified', Value: 'true' },
+      ],
+    };
+
+    const command = new AdminCreateUserCommand(input);
+    await this.client.send(command);
+  }
+
+  async setUserPassword(email: string, password: string) {
+    const input: AdminSetUserPasswordCommandInput = {
+      UserPoolId: this.config.userPoolId,
+      Username: email,
+      Password: password,
+      Permanent: true,
+    };
+
+    const command = new AdminSetUserPasswordCommand(input);
+    await this.client.send(command);
   }
 }
