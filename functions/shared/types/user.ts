@@ -1,5 +1,12 @@
 import { DynamoItem } from '../dynamo';
 
+export interface UserAvatar {
+  key: string;
+  url: string;
+  size?: number;
+  contentType?: string;
+}
+
 export interface User extends DynamoItem {
   PK: string;
   SK: string;
@@ -13,7 +20,7 @@ export interface User extends DynamoItem {
   message?: string;
   password?: string;
   registrationToken?: string;
-  avatar?: string;
+  avatar?: UserAvatar;
   createdAt: string;
 }
 
@@ -26,10 +33,12 @@ export interface CreateUserInput {
 export interface UpdateUserInput {
   name?: string;
   email?: string;
-  avatar?: string;
+  password?: string;
+  avatarKey?: string;
   approved?: boolean;
   role?: 'GUEST' | 'USER' | 'ADMIN';
   message?: string;
+  registrationToken?: string;
 }
 
 export interface LoginInput {
