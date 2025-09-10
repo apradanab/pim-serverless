@@ -19,6 +19,14 @@ const cognitoService = new CognitoService({
 export const handler = async (event: {
   pathParameters?: { userId: string };
   headers?: { Authorization?: string };
+  requestContext?: {
+    authorizer?: {
+      claims?: {
+        'cognito:groups'?: string;
+        email?: string;
+      }
+    }
+  }
 }): Promise<ApiResponse> => {
   try {
     const authHeader = event.headers?.Authorization;
@@ -26,14 +34,15 @@ export const handler = async (event: {
       return error(401, 'Authorization token required');
     }
 
-    const cognitoToken = authHeader.replace('Bearer ', '');
-    const payload = JSON.parse(Buffer.from(cognitoToken.split('.')[1], 'base64').toString()) as {
-      'cognito:groups'?: string[];
-    };
+    const groups = event.requestContext?.authorizer?.claims?.["cognito:groups"] || '';
+    const userEmail = event.requestContext?.authorizer?.claims?.email;
 
-    if (!payload['cognito:groups']?.includes('ADMIN')) {
-      return error(403, 'Admin access required');
+    if (!groups || !groups.includes('ADMIN')) {
+      return error(403, 'Admin access required')
     }
+
+    // eslint-disable-next-line no-console
+    console.log(`Admin user ${userEmail} approving user`);
 
     const userId = event.pathParameters?.userId;
     if(!userId) return error(400, 'User ID required');
