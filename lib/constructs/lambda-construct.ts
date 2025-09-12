@@ -34,7 +34,9 @@ type LambdaHandlers = {
   deleteAppointment: NodejsFunction;
 
   createUser: NodejsFunction;
-  // loginUser: NodejsFunction;
+  approveUser: NodejsFunction;
+  updateUser: NodejsFunction;
+  loginUser: NodejsFunction;
 
   mediaUpload: NodejsFunction;
 };
@@ -80,12 +82,15 @@ export class LambdaConstruct extends Construct {
       deleteAppointment: this.createHandler('DeleteAppointment', 'appointments/delete.ts', commonProps),
 
       createUser: this.createHandler('CreateUser', 'users/create.ts', commonProps),
-      // loginUser: this.createHandler('LoginUser', 'users/login.ts', commonProps),
+      approveUser: this.createHandler('ApproveUser', 'users/approve.ts', commonProps),
+      updateUser: this.createHandler('UpdateUser', 'users/update.ts', commonProps),
+      loginUser: this.createHandler('LoginUser', 'users/login.ts', commonProps),
 
       mediaUpload: this.createHandler('MediaUpload', 'core/media-upload.ts', commonProps)
     };
 
     const table = props.dbConstruct.dataTable;
+
     table.grantWriteData(this.handlers.createTherapy);
     table.grantReadData(this.handlers.listTherapies);
     table.grantReadData(this.handlers.getTherapy);
@@ -107,22 +112,43 @@ export class LambdaConstruct extends Construct {
 
     table.grantWriteData(this.handlers.createUser);
     table.grantReadData(this.handlers.createUser);
-    // table.grantReadData(this.handlers.loginUser);
-    // props.authConstruct.userPool.grant(
-    //   this.handlers.loginUser,
-    //   'cognito-idp:AdminInitiateAuth'
-    // );
+    table.grantReadWriteData(this.handlers.approveUser);
+    table.grantReadWriteData(this.handlers.updateUser);
+    table.grantReadData(this.handlers.loginUser);
 
-    props.storageConstruct.bucket.grantPut(this.handlers.mediaUpload);
-    props.storageConstruct.bucket.grantRead(this.handlers.createTherapy);
-    props.storageConstruct.bucket.grantDelete(this.handlers.createTherapy);
-    props.storageConstruct.bucket.grantRead(this.handlers.updateTherapy);
-    props.storageConstruct.bucket.grantDelete(this.handlers.updateTherapy);
+    const bucket = props.storageConstruct.bucket;
 
-    props.storageConstruct.bucket.grantRead(this.handlers.createAdvice);
-    props.storageConstruct.bucket.grantDelete(this.handlers.createAdvice);
-    props.storageConstruct.bucket.grantRead(this.handlers.updateAdvice);
-    props.storageConstruct.bucket.grantDelete(this.handlers.updateAdvice);
+    bucket.grantPut(this.handlers.mediaUpload);
+    bucket.grantRead(this.handlers.createTherapy);
+    bucket.grantDelete(this.handlers.createTherapy);
+    bucket.grantRead(this.handlers.updateTherapy);
+    bucket.grantDelete(this.handlers.updateTherapy);
+
+    bucket.grantRead(this.handlers.createAdvice);
+    bucket.grantDelete(this.handlers.createAdvice);
+    bucket.grantRead(this.handlers.updateAdvice);
+    bucket.grantDelete(this.handlers.updateAdvice);
+
+    bucket.grantRead(this.handlers.updateUser);
+    bucket.grantWrite(this.handlers.updateUser);
+
+    props.authConstruct.userPool.grant(
+      this.handlers.loginUser,
+      'cognito-idp:AdminInitiateAuth'
+    );
+
+    props.authConstruct.userPool.grant(
+      this.handlers.approveUser,
+      'cognito-idp:AdminCreateUser',
+      'cognito-idp:AdminSetUserPassword'
+    );
+
+    props.authConstruct.userPool.grant(
+      this.handlers.updateUser,
+      'cognito-idp:AdminSetUserPassword'
+    );
+
+    this.createHandler = this.createHandler.bind(this);
   }
 
   private createHandler(
