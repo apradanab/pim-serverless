@@ -25,7 +25,9 @@ interface ApiConstructProps {
     deleteAppointment: NodejsFunction;
 
     createUser: NodejsFunction;
-    // loginUser: NodejsFunction;
+    approveUser: NodejsFunction;
+    updateUser: NodejsFunction;
+    loginUser: NodejsFunction;
 
     mediaUpload: NodejsFunction;
   };
@@ -36,18 +38,26 @@ interface ApiConstructProps {
 
 export class ApiConstruct extends Construct {
   public readonly api: apigateway.RestApi;
+  private authorizer: apigateway.CognitoUserPoolsAuthorizer;
 
   constructor(scope: Construct, id: string, props: ApiConstructProps) {
     super(scope, id);
 
     this.api = new apigateway.RestApi(this, 'PimApi', {
       restApiName: 'PIM Service',
-      description: 'Therapy, Advice, and Appointments management API',
+      description: 'Therapy, Advice, Appointments, and Users management API',
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
         allowMethods: apigateway.Cors.ALL_METHODS,
       },
     });
+
+    this.authorizer = new apigateway.CognitoUserPoolsAuthorizer(this, 'PimAuthorizer', {
+      cognitoUserPools: [props.authConstruct.userPool],
+      identitySource: 'method.request.header.Authorization',
+      authorizerName: 'PimCognitoAuthorizer',
+    });
+    this.authorizer._attachToApi(this.api);
 
     const therapies = this.api.root.addResource('therapies');
     therapies.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listTherapies));
@@ -87,7 +97,17 @@ export class ApiConstruct extends Construct {
     mediaTypeAndId.addMethod('PUT', new apigateway.LambdaIntegration(props.lambdaHandlers.mediaUpload));
 
     const auth = this.api.root.addResource('auth');
-    // auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.loginUser));
+    auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.loginUser));
     auth.addResource('register').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createUser));
+    auth.addResource('complete-registration').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.updateUser));
+
+    const admin = this.api.root.addResource('admin');
+    const usersAdmin = admin.addResource('users');
+    const usersById = usersAdmin.addResource('{userId}');
+    usersById.addResource('approve').addMethod('POST',
+      new apigateway.LambdaIntegration(props.lambdaHandlers.approveUser), {
+        authorizer: this.authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      })
   }
 }
