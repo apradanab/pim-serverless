@@ -6,6 +6,7 @@ import { Construct } from 'constructs';
 import { DynamoDBConstruct } from './data/dynamodb-construct';
 import { MediaBucket } from './storage/media-bucket';
 import { CognitoConstruct } from './auth/cognito-construct';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 interface LambdaConstructProps {
   dbConstruct: DynamoDBConstruct;
@@ -37,6 +38,9 @@ type LambdaHandlers = {
   approveUser: NodejsFunction;
   updateUser: NodejsFunction;
   loginUser: NodejsFunction;
+  listUsers: NodejsFunction;
+  getUser: NodejsFunction;
+  deleteUser: NodejsFunction;
 
   mediaUpload: NodejsFunction;
 };
@@ -54,6 +58,7 @@ export class LambdaConstruct extends Construct {
       USER_POOL_ID: props.authConstruct.userPool.userPoolId,
       USER_POOL_CLIENT_ID: props.authConstruct.userPoolClient.userPoolClientId,
       REGION: cdk.Stack.of(this).region,
+      SOURCE_EMAIL: 'apradanab@gmail.com'
     }
 
     const commonProps = {
@@ -85,6 +90,9 @@ export class LambdaConstruct extends Construct {
       approveUser: this.createHandler('ApproveUser', 'users/approve.ts', commonProps),
       updateUser: this.createHandler('UpdateUser', 'users/update.ts', commonProps),
       loginUser: this.createHandler('LoginUser', 'users/login.ts', commonProps),
+      listUsers: this.createHandler('ListUsers', 'users/list.ts', commonProps),
+      getUser: this.createHandler('GetUser', 'users/get.ts', commonProps),
+      deleteUser: this.createHandler('ListUsers', 'users/list.ts', commonProps),
 
       mediaUpload: this.createHandler('MediaUpload', 'core/media-upload.ts', commonProps)
     };
@@ -110,11 +118,13 @@ export class LambdaConstruct extends Construct {
     table.grantReadWriteData(this.handlers.updateAppointment);
     table.grantWriteData(this.handlers.deleteAppointment);
 
-    table.grantWriteData(this.handlers.createUser);
-    table.grantReadData(this.handlers.createUser);
+    table.grantReadWriteData(this.handlers.createUser);
     table.grantReadWriteData(this.handlers.approveUser);
     table.grantReadWriteData(this.handlers.updateUser);
     table.grantReadData(this.handlers.loginUser);
+    table.grantReadData(this.handlers.getUser);
+    table.grantReadData(this.handlers.listUsers);
+    table.grantWriteData(this.handlers.deleteUser);
 
     const bucket = props.storageConstruct.bucket;
 
@@ -148,7 +158,10 @@ export class LambdaConstruct extends Construct {
       'cognito-idp:AdminSetUserPassword'
     );
 
-    this.createHandler = this.createHandler.bind(this);
+    this.handlers.approveUser.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+      resources: ['*']
+    }))
   }
 
   private createHandler(
