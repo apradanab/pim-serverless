@@ -28,6 +28,9 @@ interface ApiConstructProps {
     approveUser: NodejsFunction;
     updateUser: NodejsFunction;
     loginUser: NodejsFunction;
+    listUsers: NodejsFunction;
+    getUser: NodejsFunction;
+    deleteUser: NodejsFunction;
 
     mediaUpload: NodejsFunction;
   };
@@ -100,6 +103,13 @@ export class ApiConstruct extends Construct {
     auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.loginUser));
     auth.addResource('register').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createUser));
     auth.addResource('complete-registration').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.updateUser));
+
+    const users = this.api.root.addResource('users');
+    users.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listUsers));
+
+    const userById = users.addResource('{userId}');
+    userById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getUser));
+    userById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteUser));
 
     const admin = this.api.root.addResource('admin');
     const usersAdmin = admin.addResource('users');
