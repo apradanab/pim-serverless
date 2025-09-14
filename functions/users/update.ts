@@ -41,7 +41,6 @@ export const handler = async (event: { body?: string }): Promise<ApiResponse> =>
       name: input.name,
       role: 'USER',
       approved: true,
-      registrationToken: undefined,
     };
 
     if (input.avatarKey) {
