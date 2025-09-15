@@ -92,7 +92,7 @@ export class LambdaConstruct extends Construct {
       loginUser: this.createHandler('LoginUser', 'users/login.ts', commonProps),
       listUsers: this.createHandler('ListUsers', 'users/list.ts', commonProps),
       getUser: this.createHandler('GetUser', 'users/get.ts', commonProps),
-      deleteUser: this.createHandler('ListUsers', 'users/list.ts', commonProps),
+      deleteUser: this.createHandler('DeleteUser', 'users/delete.ts', commonProps),
 
       mediaUpload: this.createHandler('MediaUpload', 'core/media-upload.ts', commonProps)
     };
