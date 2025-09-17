@@ -34,7 +34,7 @@ export const handler = async (event: {
       `APPOINTMENT#${appointmentId}`,
       {
         status: AppointmentStatus.OCCUPIED,
-        userId,
+        userId: userId,
       }
     );
 
