@@ -33,6 +33,9 @@ type LambdaHandlers = {
   getAppointment: NodejsFunction;
   updateAppointment: NodejsFunction;
   deleteAppointment: NodejsFunction;
+  listAppointmentsByUser: NodejsFunction,
+  requestCancellation: NodejsFunction,
+  approveCancellation: NodejsFunction,
 
   createUser: NodejsFunction;
   approveUser: NodejsFunction;
@@ -85,6 +88,9 @@ export class LambdaConstruct extends Construct {
       getAppointment: this.createHandler('GetAppointment', 'appointments/get.ts', commonProps),
       updateAppointment: this.createHandler('UpdateAppointment', 'appointments/update.ts', commonProps),
       deleteAppointment: this.createHandler('DeleteAppointment', 'appointments/delete.ts', commonProps),
+      listAppointmentsByUser: this.createHandler('ListAppointmentsByUser', 'appointments/list-by-user.ts', commonProps),
+      requestCancellation: this.createHandler('RequestCancellation', 'appointments/request-cancellation.ts', commonProps),
+      approveCancellation: this.createHandler('ApproveCancellation', 'appointments/approve-cancellation.ts', commonProps),
 
       createUser: this.createHandler('CreateUser', 'users/create.ts', commonProps),
       approveUser: this.createHandler('ApproveUser', 'users/approve.ts', commonProps),
@@ -117,6 +123,9 @@ export class LambdaConstruct extends Construct {
     table.grantReadData(this.handlers.getAppointment);
     table.grantReadWriteData(this.handlers.updateAppointment);
     table.grantWriteData(this.handlers.deleteAppointment);
+    table.grantReadData(this.handlers.listAppointmentsByUser);
+    table.grantReadWriteData(this.handlers.requestCancellation);
+    table.grantReadWriteData(this.handlers.approveCancellation);
 
     table.grantReadWriteData(this.handlers.createUser);
     table.grantReadWriteData(this.handlers.approveUser);
