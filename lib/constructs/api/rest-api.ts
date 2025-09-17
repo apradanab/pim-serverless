@@ -23,6 +23,9 @@ interface ApiConstructProps {
     getAppointment: NodejsFunction;
     updateAppointment: NodejsFunction;
     deleteAppointment: NodejsFunction;
+    listAppointmentsByUser: NodejsFunction;
+    requestCancellation: NodejsFunction;
+    approveCancellation: NodejsFunction;
 
     createUser: NodejsFunction;
     approveUser: NodejsFunction;
@@ -91,6 +94,18 @@ export class ApiConstruct extends Construct {
     appointmentById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateAppointment));
     appointmentById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteAppointment));
 
+    const appointmentActions = appointmentById.addResource('actions');
+    appointmentActions.addResource('request-cancellation').addMethod('POST',
+      new apigateway.LambdaIntegration(props.lambdaHandlers.requestCancellation), {
+        authorizer: this.authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      });
+    appointmentActions.addResource('approve-cancellation').addMethod('POST',
+      new apigateway.LambdaIntegration(props.lambdaHandlers.approveCancellation), {
+        authorizer: this.authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      });
+
     const appointments = this.api.root.addResource('appointments');
     appointments.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listAppointments));
 
@@ -110,6 +125,14 @@ export class ApiConstruct extends Construct {
     const userById = users.addResource('{userId}');
     userById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getUser));
     userById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteUser));
+
+    const userAppointments = userById.addResource('appointments');
+    userAppointments.addMethod('GET',
+      new apigateway.LambdaIntegration(props.lambdaHandlers.listAppointmentsByUser), {
+        authorizer: this.authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      }
+    )
 
     const admin = this.api.root.addResource('admin');
     const usersAdmin = admin.addResource('users');
