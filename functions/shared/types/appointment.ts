@@ -10,6 +10,7 @@ export interface Appointment extends DynamoItem {
   GSI2SK?: string;
   appointmentId: string;
   therapyId: string;
+  userId?: string;
   date: string;
   startTime: string;
   endTime: string;
