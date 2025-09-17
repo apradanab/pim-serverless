@@ -104,4 +104,15 @@ export class DatabaseService<T extends DynamoItem> {
 
     return (result.Items || []) as T[];
   }
+
+  async queryByUserId(userId: string): Promise<T[]> {
+    const result = await this.docClient.send(new QueryCommand({
+      TableName: this.tableName,
+      IndexName: 'UserAppointmentsIndex',
+      KeyConditionExpression: 'userId = :uid',
+      ExpressionAttributeValues: { ':uid': userId }
+    }));
+
+    return (result.Items || []) as T[];
+  }
 }
