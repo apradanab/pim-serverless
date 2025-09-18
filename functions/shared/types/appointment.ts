@@ -18,6 +18,7 @@ export interface Appointment extends DynamoItem {
   notes?: string;
   adminNotes?: string;
   createdAt: string;
+  requestedAt?: string;
 }
 
 export interface CreateAppointmentInput {
