@@ -24,6 +24,9 @@ interface ApiConstructProps {
     updateAppointment: NodejsFunction;
     deleteAppointment: NodejsFunction;
     listAppointmentsByUser: NodejsFunction;
+    requestAppointment: NodejsFunction;
+    approveAppointment: NodejsFunction;
+    assignAppointment: NodejsFunction;
     requestCancellation: NodejsFunction;
     approveCancellation: NodejsFunction;
 
@@ -67,34 +70,76 @@ export class ApiConstruct extends Construct {
 
     const therapies = this.api.root.addResource('therapies');
     therapies.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listTherapies));
-    therapies.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createTherapy));
+    therapies.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createTherapy), {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     const therapyById = therapies.addResource('{therapyId}');
     therapyById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getTherapy));
-    therapyById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateTherapy));
-    therapyById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteTherapy));
+    therapyById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateTherapy), {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+    therapyById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteTherapy), {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     const therapyAdvices = therapyById.addResource('advices');
-    therapyAdvices.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAdvice));
+    therapyAdvices.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAdvice), {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
     therapyAdvices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listAdvicesByTherapy));
 
     const adviceById = therapyAdvices.addResource('{adviceId}');
     adviceById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAdvice));
-    adviceById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateAdvice));
-    adviceById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteAdvice));
+    adviceById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateAdvice), {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+    adviceById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteAdvice), {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     const advices = this.api.root.addResource('advices');
     advices.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.listAdvices));
 
     const therapyAppointments = therapyById.addResource('appointments');
-    therapyAppointments.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAppointment));
+    therapyAppointments.addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.createAppointment), {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     const appointmentById = therapyAppointments.addResource('{appointmentId}');
     appointmentById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getAppointment));
-    appointmentById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateAppointment));
-    appointmentById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteAppointment));
+    appointmentById.addMethod('PATCH', new apigateway.LambdaIntegration(props.lambdaHandlers.updateAppointment), {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+    appointmentById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteAppointment), {
+      authorizer: this.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     const appointmentActions = appointmentById.addResource('actions');
+    appointmentActions.addResource('request').addMethod('POST',
+      new apigateway.LambdaIntegration(props.lambdaHandlers.requestAppointment), {
+        authorizer: this.authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      });
+    appointmentActions.addResource('approve').addMethod('POST',
+      new apigateway.LambdaIntegration(props.lambdaHandlers.approveAppointment), {
+        authorizer: this.authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      });
+    appointmentActions.addResource('assign').addMethod('POST',
+      new apigateway.LambdaIntegration(props.lambdaHandlers.assignAppointment), {
+        authorizer: this.authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      });
     appointmentActions.addResource('request-cancellation').addMethod('POST',
       new apigateway.LambdaIntegration(props.lambdaHandlers.requestCancellation), {
         authorizer: this.authorizer,
@@ -112,7 +157,10 @@ export class ApiConstruct extends Construct {
     const media = this.api.root.addResource('media');
     const mediaType = media.addResource('{type}');
     const mediaTypeAndId = mediaType.addResource('{id}');
-    mediaTypeAndId.addMethod('PUT', new apigateway.LambdaIntegration(props.lambdaHandlers.mediaUpload));
+    mediaTypeAndId.addMethod('PUT', new apigateway.LambdaIntegration(props.lambdaHandlers.mediaUpload), {
+        authorizer: this.authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      });
 
     const auth = this.api.root.addResource('auth');
     auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(props.lambdaHandlers.loginUser));
@@ -124,7 +172,10 @@ export class ApiConstruct extends Construct {
 
     const userById = users.addResource('{userId}');
     userById.addMethod('GET', new apigateway.LambdaIntegration(props.lambdaHandlers.getUser));
-    userById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteUser));
+    userById.addMethod('DELETE', new apigateway.LambdaIntegration(props.lambdaHandlers.deleteUser), {
+        authorizer: this.authorizer,
+        authorizationType: apigateway.AuthorizationType.COGNITO,
+      });
 
     const userAppointments = userById.addResource('appointments');
     userAppointments.addMethod('GET',
