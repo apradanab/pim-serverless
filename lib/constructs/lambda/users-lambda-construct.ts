@@ -1,0 +1,80 @@
+import { Construct } from 'constructs';
+import * as lambda from 'aws-cdk-lib/aws-lambda';
+import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
+import * as path from 'path';
+import { DynamoDBConstruct } from '../data/dynamodb-construct';
+import { MediaBucket } from '../storage/media-bucket';
+import { CognitoConstruct } from '../auth/cognito-construct';
+import * as iam from 'aws-cdk-lib/aws-iam';
+
+interface UsersLambdaProps {
+  dbConstruct: DynamoDBConstruct;
+  storageConstruct: MediaBucket;
+  authConstruct: CognitoConstruct;
+  commonEnv: Record<string, string>;
+  commonProps: Partial<NodejsFunctionProps>;
+}
+
+export class UsersLambdaConstruct extends Construct {
+  public readonly createUser: NodejsFunction;
+  public readonly approveUser: NodejsFunction;
+  public readonly updateUser: NodejsFunction;
+  public readonly loginUser: NodejsFunction;
+  public readonly listUsers: NodejsFunction;
+  public readonly getUser: NodejsFunction;
+  public readonly deleteUser: NodejsFunction;
+
+  constructor(scope: Construct, id: string, props: UsersLambdaProps) {
+    super(scope, id);
+
+    this.createUser = this.createHandler('CreateUser', 'users/create.ts', props);
+    this.approveUser = this.createHandler('ApproveUser', 'users/approve.ts', props);
+    this.updateUser = this.createHandler('UpdateUser', 'users/update.ts', props);
+    this.loginUser = this.createHandler('LoginUser', 'users/login.ts', props);
+    this.listUsers = this.createHandler('ListUsers', 'users/list.ts', props);
+    this.getUser = this.createHandler('GetUser', 'users/get.ts', props);
+    this.deleteUser = this.createHandler('DeleteUser', 'users/delete.ts', props);
+
+    const table = props.dbConstruct.dataTable;
+    table.grantReadWriteData(this.createUser);
+    table.grantReadWriteData(this.approveUser);
+    table.grantReadWriteData(this.updateUser);
+    table.grantReadData(this.loginUser);
+    table.grantReadData(this.getUser);
+    table.grantReadData(this.listUsers);
+    table.grantWriteData(this.deleteUser);
+
+    const bucket = props.storageConstruct.bucket;
+    bucket.grantRead(this.updateUser);
+    bucket.grantWrite(this.updateUser);
+
+    props.authConstruct.userPool.grant(
+      this.loginUser,
+      'cognito-idp:AdminInitiateAuth'
+    );
+    props.authConstruct.userPool.grant(
+      this.approveUser,
+      'cognito-idp:AdminCreateUser',
+      'cognito-idp:AdminSetUserPassword'
+    );
+    props.authConstruct.userPool.grant(
+      this.updateUser,
+      'cognito-idp:AdminSetUserPassword'
+    );
+
+    this.approveUser.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+      resources: ['*']
+    }));
+  }
+
+  private createHandler(id: string, handlerFile: string, props: UsersLambdaProps): NodejsFunction {
+    return new NodejsFunction(this, id, {
+      runtime: lambda.Runtime.NODEJS_22_X,
+      environment: props.commonEnv,
+      entry: path.join(__dirname, '..', '..', '..','functions', handlerFile),
+      handler: 'handler',
+      ...props.commonProps,
+    });
+  }
+}
