@@ -18,7 +18,22 @@ const cognitoService = new CognitoService({
 
 export const handler = async (event: {
   pathParameters?: { userId: string };
+  requestContext?: {
+    authorizer?: {
+      claims?: {
+        email?: string;
+        sub?: string;
+        ['cognito:groups']?: string;
+      }
+    }
+  }
 }): Promise<ApiResponse> => {
+  const groups = event.requestContext?.authorizer?.claims?.['cognito:groups'] || '';
+
+  if (!groups.includes('ADMIN')) {
+    return error(403, 'Only Admins are authorized to create therapies');
+  }
+
   try {
     const userId = event.pathParameters?.userId;
     if(!userId) return error(400, 'User ID required');
