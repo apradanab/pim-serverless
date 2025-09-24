@@ -18,6 +18,7 @@ interface UsersLambdaProps {
 export class UsersLambdaConstruct extends Construct {
   public readonly createUser: NodejsFunction;
   public readonly approveUser: NodejsFunction;
+  public readonly completeRegistration: NodejsFunction;
   public readonly updateUser: NodejsFunction;
   public readonly loginUser: NodejsFunction;
   public readonly listUsers: NodejsFunction;
@@ -29,6 +30,7 @@ export class UsersLambdaConstruct extends Construct {
 
     this.createUser = this.createHandler('CreateUser', 'users/create.ts', props);
     this.approveUser = this.createHandler('ApproveUser', 'users/approve.ts', props);
+    this.completeRegistration = this.createHandler('CompleteRegistration', 'users/complete-registration.ts', props);
     this.updateUser = this.createHandler('UpdateUser', 'users/update.ts', props);
     this.loginUser = this.createHandler('LoginUser', 'users/login.ts', props);
     this.listUsers = this.createHandler('ListUsers', 'users/list.ts', props);
@@ -38,6 +40,7 @@ export class UsersLambdaConstruct extends Construct {
     const table = props.dbConstruct.dataTable;
     table.grantReadWriteData(this.createUser);
     table.grantReadWriteData(this.approveUser);
+    table.grantReadWriteData(this.completeRegistration);
     table.grantReadWriteData(this.updateUser);
     table.grantReadData(this.loginUser);
     table.grantReadData(this.getUser);
@@ -45,6 +48,7 @@ export class UsersLambdaConstruct extends Construct {
     table.grantWriteData(this.deleteUser);
 
     const bucket = props.storageConstruct.bucket;
+    bucket.grantReadWrite(this.completeRegistration);
     bucket.grantRead(this.updateUser);
     bucket.grantWrite(this.updateUser);
 
@@ -57,6 +61,10 @@ export class UsersLambdaConstruct extends Construct {
       'cognito-idp:AdminCreateUser',
       'cognito-idp:AdminSetUserPassword'
     );
+    props.authConstruct.userPool.grant(
+      this.completeRegistration,
+      'cognito-idp:AdminSetUserPassword'
+    )
     props.authConstruct.userPool.grant(
       this.updateUser,
       'cognito-idp:AdminSetUserPassword'

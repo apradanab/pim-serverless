@@ -10,6 +10,7 @@ interface UsersRoutesProps {
     getUser: NodejsFunction;
     listAppointmentsByUser: NodejsFunction;
     approveUser: NodejsFunction;
+    updateUser: NodejsFunction;
     deleteUser: NodejsFunction;
   };
 }
@@ -23,6 +24,10 @@ export class UsersRoutesConstruct extends Construct {
 
     const userById = users.addResource('{userId}');
     userById.addMethod('GET', new apigateway.LambdaIntegration(props.handlers.getUser));
+    userById.addMethod('PATCH', new apigateway.LambdaIntegration(props.handlers.updateUser), {
+      authorizer: props.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
     userById.addMethod('DELETE', new apigateway.LambdaIntegration(props.handlers.deleteUser), {
       authorizer: props.authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
