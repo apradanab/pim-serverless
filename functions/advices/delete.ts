@@ -5,7 +5,22 @@ const dbService = new DatabaseService(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
   pathParameters?: { therapyId?: string; adviceId?: string };
+  requestContext?: {
+    authorizer?: {
+      claims?: {
+        email?: string;
+        sub?: string;
+        ['cognito:groups']?: string;
+      }
+    }
+  }
 }): Promise<ApiResponse> => {
+  const groups = event.requestContext?.authorizer?.claims?.['cognito:groups'] || '';
+
+  if (!groups.includes('ADMIN')) {
+    return error(403, 'Only Admins are authorized to create therapies');
+  }
+
   const { therapyId, adviceId } = event.pathParameters || {};
 
   if (!therapyId || !adviceId) {

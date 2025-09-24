@@ -5,9 +5,23 @@ const dbService = new DatabaseService(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
   pathParameters?: { therapyId?: string; appointmentId?: string };
+  requestContext?: {
+    authorizer?: {
+      claims?: {
+        email?: string;
+        sub?: string;
+        ['cognito:groups']?: string;
+      };
+    };
+  };
 }): Promise<ApiResponse> => {
-  const { therapyId, appointmentId } = event.pathParameters || {};
+  const groups = event.requestContext?.authorizer?.claims?.['cognito:groups'] || '';
 
+  if (!groups.includes('ADMIN')) {
+    return error(403, 'Only admin is authorized to delete appointments');
+  }
+
+  const { therapyId, appointmentId } = event.pathParameters || {};
   if (!therapyId || !appointmentId) return error(400, 'Therapy and appointment ids are required');
 
   try {

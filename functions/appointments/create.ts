@@ -6,9 +6,24 @@ import { DatabaseService } from '../../lib/constructs/services/database-service'
 const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
-  pathParameters?: { therapyId?: string },
-  body?: string
+  pathParameters?: { therapyId?: string };
+  body?: string;
+  requestContext?: {
+    authorizer?: {
+      claims?: {
+        email?: string;
+        sub?: string;
+        ['cognito:groups']?: string;
+      };
+    };
+  };
 }): Promise<ApiResponse> => {
+  const groups = event.requestContext?.authorizer?.claims?.['cognito:groups'] || '';
+
+  if (!groups.includes('ADMIN')) {
+    return error(403, 'Only admin is authorized to create appointments');
+  }
+
   const therapyId = event.pathParameters?.therapyId;
   const input = JSON.parse(event.body || '{}') as CreateAppointmentInput;
 

@@ -16,7 +16,24 @@ const mediaService = new MediaService({
   maxSizeMB: 5
 });
 
-export const handler = async (event: { body?: string }): Promise<ApiResponse> => {
+export const handler = async (event: {
+  body?: string;
+  requestContext?: {
+    authorizer?: {
+      claims?: {
+        email?: string;
+        sub?: string;
+        ['cognito:groups']?: string;
+      }
+    }
+  }
+}): Promise<ApiResponse> => {
+  const groups = event.requestContext?.authorizer?.claims?.['cognito:groups'] || '';
+
+  if (!groups.includes('ADMIN')) {
+    return error(403, 'Only Admins are authorized to create therapies');
+  }
+
   const input = JSON.parse(event.body || '{}') as CreateTherapyInput;
 
   if (!input.title || !input.description || !input.content) {

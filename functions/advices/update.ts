@@ -18,7 +18,22 @@ const mediaService = new MediaService({
 export const handler = async (event: {
   pathParameters?: { therapyId?: string; adviceId?: string };
   body?: string;
+  requestContext?: {
+    authorizer?: {
+      claims?: {
+        email?: string;
+        sub?: string;
+        ['cognito:groups']?: string;
+      }
+    }
+  }
 }): Promise<ApiResponse> => {
+  const groups = event.requestContext?.authorizer?.claims?.['cognito:groups'] || '';
+
+  if (!groups.includes('ADMIN')) {
+    return error(403, 'Only Admins are authorized to create therapies');
+  }
+
   const therapyId = event.pathParameters?.therapyId;
   const adviceId = event.pathParameters?.adviceId;
 

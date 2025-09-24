@@ -7,7 +7,22 @@ const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 export const handler = async (event: {
   pathParameters?: { appointmentId?: string };
   body?: string;
+  requestContext?: {
+    authorizer?: {
+      claims?: {
+        email?: string;
+        sub?: string;
+        ['cognito:groups']?: string;
+      };
+    };
+  };
 }): Promise<ApiResponse> => {
+  const groups = event.requestContext?.authorizer?.claims?.['cognito:groups'] || '';
+
+  if (!groups.includes('ADMIN')) {
+    return error(403, 'Only admin is authorized to create appointments');
+  }
+
   try {
     const appointmentId = event.pathParameters?.appointmentId;
 
