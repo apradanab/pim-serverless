@@ -7,14 +7,22 @@ const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 export const handler = async (event: {
   pathParameters?: { appointmentId?: string };
   body?: string;
+  requestContext?: {
+    authorizer?: {
+      claims?: {
+        sub?: string;
+      };
+    };
+  };
 }): Promise<ApiResponse> => {
   try {
     const appointmentId = event.pathParameters?.appointmentId;
     const { notes } = JSON.parse(event.body || '{}') as { notes: string };
+    const userId = event.requestContext?.authorizer?.claims?.sub;
 
     if(!appointmentId) return error(400, 'Appointment ID is required');
-
     if(!notes) return error(400, 'Cancellation reason is required');
+    if(!userId) return error(401, 'User authentication required');
 
     const appointment = await dbService.getItem(
       `APPOINTMENT#${appointmentId}`,
@@ -22,6 +30,9 @@ export const handler = async (event: {
     );
 
     if(!appointment) return error(404, 'Appointment not found');
+    if(appointment.userId !== userId) {
+      return error(403, 'You are not allowed to cancel this appointment');
+    }
 
     await dbService.updateItem(
       `APPOINTMENT#${appointmentId}`,
