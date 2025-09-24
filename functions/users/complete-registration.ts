@@ -21,40 +21,29 @@ const mediaService = new MediaService({
   maxSizeMB: 5
 });
 
-interface CognitoClaims {
-  sub: string;
-  email?: string;
-  ['cognito:groups']?: string[];
-  [key: string]: unknown;
-}
-
-export const handler = async (event: {
-  body?: string;
-  requestContext?: {
-    authorizer?: {
-      claims?: CognitoClaims
-    }
-  }
-}): Promise<ApiResponse> => {
+export const handler = async (event: { body?: string }): Promise<ApiResponse> => {
   try {
-    const claims = event.requestContext?.authorizer?.claims;
-    if(!claims?.sub) return error(401, 'User authentication required');
-
     const input = JSON.parse(event.body || '{}') as UpdateUserInput;
 
-    const user = await dbService.getItem(`USER#${claims.sub}`, `USER#${claims.sub}`);
-    if (!user) return error(404, 'User not found');
-
-    if (input.password) {
-      await cognitoService.setUserPassword(user.email, input.password);
+    if (!input.registrationToken || !input.password || !input.email) {
+      return error(400, 'Token, password, and email are required')
     }
+
+    const { registrationToken, password, email } = input;
+    const users = await dbService.queryByEmail(email);
+    const user = users.find(u => u.registrationToken === registrationToken);
+
+    if(!user) return error(404, 'Invalid token');
+
+    await cognitoService.setUserPassword(user.email, password);
 
     const updateData: Partial<User> = {
       name: input.name,
-      email: input.email,
-    }
+      role: 'USER',
+      approved: true,
+    };
 
-    if(input.avatarKey) {
+    if (input.avatarKey) {
       const metadata = await mediaService.getMediaMetadata(input.avatarKey);
       updateData.avatar = {
         key: input.avatarKey,
@@ -69,18 +58,19 @@ export const handler = async (event: {
       }
     }
 
-    await dbService.updateItem(`USER#${claims.sub}`, `USER#${claims.sub}`, updateData);
+    await dbService.updateItem(`USER#${user.userId}`, `USER#${user.userId}`, updateData);
 
-    return success({ message: 'Profile updated successfully' });
+    return success({ message: 'Registration completed successfully' });
+
   } catch (err) {
-    console.error('Error updating user profile', err);
+    console.error("Update user error", err);
 
-    const input = JSON.parse(event.body || '{}') as UpdateUserInput;
+    const input = JSON.parse(event.body || '{}' ) as UpdateUserInput;
     if (input.avatarKey) {
       await mediaService.deleteMedia(input.avatarKey)
         .catch(e => console.error('Failed to cleanup avatar:', e));
     }
 
-    return error(500, 'Internal Server Error');
+    return error(500, "Error completing registration");
   }
 }
