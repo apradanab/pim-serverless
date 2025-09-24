@@ -45,6 +45,7 @@ export interface AllLambdaHandlers {
 
   createUser: NodejsFunction;
   approveUser: NodejsFunction;
+  completeRegistration: NodejsFunction;
   updateUser: NodejsFunction;
   loginUser: NodejsFunction;
   listUsers: NodejsFunction;
@@ -137,6 +138,7 @@ export class LambdaConstruct extends Construct {
 
       createUser: users.createUser,
       approveUser: users.approveUser,
+      completeRegistration: users.completeRegistration,
       updateUser: users.updateUser,
       loginUser: users.loginUser,
       listUsers: users.listUsers,

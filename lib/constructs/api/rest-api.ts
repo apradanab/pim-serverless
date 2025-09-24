@@ -38,6 +38,7 @@ interface ApiConstructProps {
 
     createUser: NodejsFunction;
     approveUser: NodejsFunction;
+    completeRegistration: NodejsFunction;
     updateUser: NodejsFunction;
     loginUser: NodejsFunction;
     listUsers: NodejsFunction;
@@ -79,7 +80,7 @@ export class ApiConstruct extends Construct {
       handlers: {
         loginUser: props.lambdaHandlers.loginUser,
         createUser: props.lambdaHandlers.createUser,
-        updateUser: props.lambdaHandlers.updateUser,
+        completeRegistration: props.lambdaHandlers.completeRegistration,
       },
     });
 
@@ -139,6 +140,7 @@ export class ApiConstruct extends Construct {
       handlers: {
         listUsers: props.lambdaHandlers.listUsers,
         getUser: props.lambdaHandlers.getUser,
+        updateUser: props.lambdaHandlers.updateUser,
         deleteUser: props.lambdaHandlers.deleteUser,
         listAppointmentsByUser: props.lambdaHandlers.listAppointmentsByUser,
         approveUser: props.lambdaHandlers.approveUser,

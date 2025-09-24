@@ -7,7 +7,7 @@ interface AuthRoutesProps {
   handlers: {
     loginUser: NodejsFunction;
     createUser: NodejsFunction;
-    updateUser: NodejsFunction;
+    completeRegistration: NodejsFunction;
   };
 }
 
@@ -18,6 +18,6 @@ export class AuthRoutesConstruct extends Construct {
     const auth = props.api.root.addResource('auth');
     auth.addResource('login').addMethod('POST', new apigateway.LambdaIntegration(props.handlers.loginUser));
     auth.addResource('register').addMethod('POST', new apigateway.LambdaIntegration(props.handlers.createUser));
-    auth.addResource('complete-registration').addMethod('POST', new apigateway.LambdaIntegration(props.handlers.updateUser));
+    auth.addResource('complete-registration').addMethod('POST', new apigateway.LambdaIntegration(props.handlers.completeRegistration));
   }
 }
