@@ -7,6 +7,7 @@ import {
   AdminCreateUserCommandInput,
   AdminSetUserPasswordCommandInput,
   AdminSetUserPasswordCommand,
+  AdminDeleteUserCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 
 interface CognitoConfig {
@@ -72,5 +73,12 @@ export class CognitoService {
 
     const command = new AdminSetUserPasswordCommand(input);
     await this.client.send(command);
+  }
+
+  async deleteUser(email: string) {
+    await this.client.send(new AdminDeleteUserCommand({
+      UserPoolId: this.config.userPoolId,
+      Username: email,
+    }));
   }
 }
