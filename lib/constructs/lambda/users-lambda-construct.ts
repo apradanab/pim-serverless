@@ -45,7 +45,7 @@ export class UsersLambdaConstruct extends Construct {
     table.grantReadData(this.loginUser);
     table.grantReadData(this.getUser);
     table.grantReadData(this.listUsers);
-    table.grantWriteData(this.deleteUser);
+    table.grantReadWriteData(this.deleteUser);
 
     const bucket = props.storageConstruct.bucket;
     bucket.grantReadWrite(this.completeRegistration);
@@ -68,6 +68,10 @@ export class UsersLambdaConstruct extends Construct {
     props.authConstruct.userPool.grant(
       this.updateUser,
       'cognito-idp:AdminSetUserPassword'
+    );
+    props.authConstruct.userPool.grant(
+      this.deleteUser,
+      'cognito-idp:AdminDeleteUser'
     );
 
     this.approveUser.addToRolePolicy(new iam.PolicyStatement({
