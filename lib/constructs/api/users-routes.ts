@@ -20,7 +20,10 @@ export class UsersRoutesConstruct extends Construct {
     super(scope, id);
 
     const users = props.api.root.addResource('users');
-    users.addMethod('GET', new apigateway.LambdaIntegration(props.handlers.listUsers));
+    users.addMethod('GET', new apigateway.LambdaIntegration(props.handlers.listUsers), {
+      authorizer: props.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
 
     const userById = users.addResource('{userId}');
     userById.addMethod('GET', new apigateway.LambdaIntegration(props.handlers.getUser));
