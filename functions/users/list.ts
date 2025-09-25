@@ -10,7 +10,7 @@ export const handler = async (event: {
       claims?: {
         email?: string;
         sub?: string;
-        ['cognito:groups']?: string;
+        ['cognito:groups']?: string[];
       };
     };
   };
