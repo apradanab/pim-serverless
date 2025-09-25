@@ -29,6 +29,7 @@ interface CognitoClaims {
 }
 
 export const handler = async (event: {
+  pathParameters?: { userId?: string };
   body?: string;
   requestContext?: {
     authorizer?: {
@@ -38,11 +39,12 @@ export const handler = async (event: {
 }): Promise<ApiResponse> => {
   try {
     const claims = event.requestContext?.authorizer?.claims;
-    if(!claims?.sub) return error(401, 'User authentication required');
+    if (!claims?.email) return error(401, 'Authentication required');
 
     const input = JSON.parse(event.body || '{}') as UpdateUserInput;
 
-    const user = await dbService.getItem(`USER#${claims.sub}`, `USER#${claims.sub}`);
+    const users = await dbService.queryByEmail(claims.email);
+    const user = users[0];
     if (!user) return error(404, 'User not found');
 
     if (input.password) {
@@ -52,9 +54,9 @@ export const handler = async (event: {
     const updateData: Partial<User> = {
       name: input.name,
       email: input.email,
-    }
+    };
 
-    if(input.avatarKey) {
+    if (input.avatarKey) {
       const metadata = await mediaService.getMediaMetadata(input.avatarKey);
       updateData.avatar = {
         key: input.avatarKey,
@@ -69,7 +71,7 @@ export const handler = async (event: {
       }
     }
 
-    await dbService.updateItem(`USER#${claims.sub}`, `USER#${claims.sub}`, updateData);
+    await dbService.updateItem(`USER#${user.userId}`, `USER#${user.userId}`, updateData);
 
     return success({ message: 'Profile updated successfully' });
   } catch (err) {
@@ -83,4 +85,4 @@ export const handler = async (event: {
 
     return error(500, 'Internal Server Error');
   }
-}
+};
