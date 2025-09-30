@@ -26,10 +26,9 @@ export class AppointmentsRoutesConstruct extends Construct {
     const appointments = props.api.root.addResource('appointments');
     appointments.addMethod('GET', new apigateway.LambdaIntegration(props.handlers.listAppointments));
 
-    const therapyAppointments = props.api.root
-      .getResource('therapies')!
-      .getResource('{therapyId}')!
-      .getResource('appointments');
+    const therapies = props.api.root.getResource('therapies');
+    const therapyById = therapies?.getResource('{therapyId}');
+    const therapyAppointments = therapyById?.addResource('appointments');
     therapyAppointments?.addMethod('POST', new apigateway.LambdaIntegration(props.handlers.createAppointment), {
       authorizer: props.authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
