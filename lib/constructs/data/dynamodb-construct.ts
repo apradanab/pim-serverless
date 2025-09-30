@@ -29,8 +29,8 @@ export class DynamoDBConstruct extends Construct {
 
     this.dataTable.addGlobalSecondaryIndex({
       indexName: 'UserAppointmentsIndex',
-      partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
-      sortKey: { name: 'SK', type: dynamodb.AttributeType.STRING },
+      partitionKey: { name: 'GSI2PK', type: dynamodb.AttributeType.STRING },
+      sortKey: { name: 'GSI2SK', type: dynamodb.AttributeType.STRING },
       projectionType: dynamodb.ProjectionType.ALL
     })
   }
