@@ -109,8 +109,10 @@ export class DatabaseService<T extends DynamoItem> {
     const result = await this.docClient.send(new QueryCommand({
       TableName: this.tableName,
       IndexName: 'UserAppointmentsIndex',
-      KeyConditionExpression: 'userId = :uid',
-      ExpressionAttributeValues: { ':uid': userId }
+      KeyConditionExpression: 'GSI2PK = :gsi2pk',
+      ExpressionAttributeValues: {
+          ':gsi2pk': `USER#${userId}`
+        }
     }));
 
     return (result.Items || []) as T[];
