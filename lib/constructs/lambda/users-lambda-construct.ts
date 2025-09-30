@@ -28,14 +28,14 @@ export class UsersLambdaConstruct extends Construct {
   constructor(scope: Construct, id: string, props: UsersLambdaProps) {
     super(scope, id);
 
-    this.createUser = this.createHandler('CreateUser', 'users/create.ts', props);
-    this.approveUser = this.createHandler('ApproveUser', 'users/approve.ts', props);
+    this.createUser = this.createHandler('Create', 'users/create.ts', props);
+    this.approveUser = this.createHandler('Approve', 'users/approve.ts', props);
     this.completeRegistration = this.createHandler('CompleteRegistration', 'users/complete-registration.ts', props);
-    this.updateUser = this.createHandler('UpdateUser', 'users/update.ts', props);
-    this.loginUser = this.createHandler('LoginUser', 'users/login.ts', props);
-    this.listUsers = this.createHandler('ListUsers', 'users/list.ts', props);
-    this.getUser = this.createHandler('GetUser', 'users/get.ts', props);
-    this.deleteUser = this.createHandler('DeleteUser', 'users/delete.ts', props);
+    this.updateUser = this.createHandler('Update', 'users/update.ts', props);
+    this.loginUser = this.createHandler('Login', 'users/login.ts', props);
+    this.listUsers = this.createHandler('List', 'users/list.ts', props);
+    this.getUser = this.createHandler('Get', 'users/get.ts', props);
+    this.deleteUser = this.createHandler('Delete', 'users/delete.ts', props);
 
     const table = props.dbConstruct.dataTable;
     table.grantReadWriteData(this.createUser);

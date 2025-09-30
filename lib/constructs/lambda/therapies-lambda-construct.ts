@@ -22,11 +22,11 @@ export class TherapiesLambdaConstruct extends Construct {
   constructor(scope: Construct, id: string, props: TherapiesLambdaProps) {
     super(scope, id);
 
-    this.createTherapy = this.createHandler('CreateTherapy', 'therapies/create.ts', props);
-    this.listTherapies = this.createHandler('ListTherapies', 'therapies/list.ts', props);
-    this.getTherapy = this.createHandler('GetTherapy', 'therapies/get.ts', props);
-    this.updateTherapy = this.createHandler('UpdateTherapy', 'therapies/update.ts', props);
-    this.deleteTherapy = this.createHandler('DeleteTherapy', 'therapies/delete.ts', props);
+    this.createTherapy = this.createHandler('Create', 'therapies/create.ts', props);
+    this.listTherapies = this.createHandler('List', 'therapies/list.ts', props);
+    this.getTherapy = this.createHandler('Get', 'therapies/get.ts', props);
+    this.updateTherapy = this.createHandler('Update', 'therapies/update.ts', props);
+    this.deleteTherapy = this.createHandler('Delete', 'therapies/delete.ts', props);
 
     const table = props.dbConstruct.dataTable;
     table.grantWriteData(this.createTherapy);
