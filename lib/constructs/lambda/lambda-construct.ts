@@ -76,27 +76,27 @@ export class LambdaConstruct extends Construct {
       environment: commonEnv
     };
 
-    const therapies = new TherapiesLambdaConstruct(this, 'TherapiesLambda', {
+    const therapies = new TherapiesLambdaConstruct(this, 'Therapies', {
       dbConstruct: props.dbConstruct,
       storageConstruct: props.storageConstruct,
       commonEnv,
       commonProps
     });
 
-    const advice = new AdviceLambdaConstruct(this, 'AdviceLambda', {
+    const advice = new AdviceLambdaConstruct(this, 'Advices', {
       dbConstruct: props.dbConstruct,
       storageConstruct: props.storageConstruct,
       commonEnv,
       commonProps
     });
 
-    const appointments = new AppointmentsLambdaConstruct(this, 'AppointmentsLambda', {
+    const appointments = new AppointmentsLambdaConstruct(this, 'Appointments', {
       dbConstruct: props.dbConstruct,
       commonEnv,
       commonProps
     });
 
-    const users = new UsersLambdaConstruct(this, 'UsersLambda', {
+    const users = new UsersLambdaConstruct(this, 'Users', {
       dbConstruct: props.dbConstruct,
       storageConstruct: props.storageConstruct,
       authConstruct: props.authConstruct,
@@ -104,7 +104,7 @@ export class LambdaConstruct extends Construct {
       commonProps
     });
 
-    const core = new CoreLambdaConstruct(this, 'CoreLambda', {
+    const core = new CoreLambdaConstruct(this, 'Core', {
       storageConstruct: props.storageConstruct,
       commonEnv,
       commonProps

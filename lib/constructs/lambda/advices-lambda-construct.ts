@@ -23,12 +23,12 @@ export class AdviceLambdaConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AdviceLambdaProps) {
     super(scope, id);
 
-    this.createAdvice = this.createHandler('CreateAdvice', 'advices/create.ts', props);
-    this.listAdvices = this.createHandler('ListAdvices', 'advices/list.ts', props);
-    this.getAdvice = this.createHandler('GetAdvice', 'advices/get.ts', props);
-    this.listAdvicesByTherapy = this.createHandler('ListAdvicesByTherapy', 'advices/list-by-therapy.ts', props);
-    this.updateAdvice = this.createHandler('UpdateAdvice', 'advices/update.ts', props);
-    this.deleteAdvice = this.createHandler('DeleteAdvice', 'advices/delete.ts', props);
+    this.createAdvice = this.createHandler('Create', 'advices/create.ts', props);
+    this.listAdvices = this.createHandler('List', 'advices/list.ts', props);
+    this.getAdvice = this.createHandler('Get', 'advices/get.ts', props);
+    this.listAdvicesByTherapy = this.createHandler('ListByTherapy', 'advices/list-by-therapy.ts', props);
+    this.updateAdvice = this.createHandler('Update', 'advices/update.ts', props);
+    this.deleteAdvice = this.createHandler('Delete', 'advices/delete.ts', props);
 
     const table = props.dbConstruct.dataTable;
     table.grantWriteData(this.createAdvice);

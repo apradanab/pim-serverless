@@ -26,15 +26,15 @@ export class AppointmentsLambdaConstruct extends Construct {
   constructor(scope: Construct, id: string, props: AppointmentsLambdaProps) {
     super(scope, id);
 
-    this.createAppointment = this.createHandler('CreateAppointment', 'appointments/create.ts', props);
-    this.listAppointments = this.createHandler('ListAppointments', 'appointments/list.ts', props);
-    this.getAppointment = this.createHandler('GetAppointment', 'appointments/get.ts', props);
-    this.updateAppointment = this.createHandler('UpdateAppointment', 'appointments/update.ts', props);
-    this.deleteAppointment = this.createHandler('DeleteAppointment', 'appointments/delete.ts', props);
-    this.listAppointmentsByUser = this.createHandler('ListAppointmentsByUser', 'appointments/list-by-user.ts', props);
-    this.requestAppointment = this.createHandler('RequestAppointment', 'appointments/request.ts', props);
-    this.approveAppointment = this.createHandler('ApproveAppointment', 'appointments/approve.ts', props);
-    this.assignAppointment = this.createHandler('AssignAppointment', 'appointments/assign.ts', props);
+    this.createAppointment = this.createHandler('Create', 'appointments/create.ts', props);
+    this.listAppointments = this.createHandler('List', 'appointments/list.ts', props);
+    this.getAppointment = this.createHandler('Get', 'appointments/get.ts', props);
+    this.updateAppointment = this.createHandler('Update', 'appointments/update.ts', props);
+    this.deleteAppointment = this.createHandler('Delete', 'appointments/delete.ts', props);
+    this.listAppointmentsByUser = this.createHandler('ListByUser', 'appointments/list-by-user.ts', props);
+    this.requestAppointment = this.createHandler('Request', 'appointments/request.ts', props);
+    this.approveAppointment = this.createHandler('Approve', 'appointments/approve.ts', props);
+    this.assignAppointment = this.createHandler('Assign', 'appointments/assign.ts', props);
     this.requestCancellation = this.createHandler('RequestCancellation', 'appointments/request-cancellation.ts', props);
     this.approveCancellation = this.createHandler('ApproveCancellation', 'appointments/approve-cancellation.ts', props);
 
