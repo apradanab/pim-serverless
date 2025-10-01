@@ -41,8 +41,10 @@ export const handler = async (event: {
       `APPOINTMENT#${appointmentId}`,
       {
         status: AppointmentStatus.PENDING,
-        userId,
-        userEmail,
+        userId: userId,
+        userEmail: userEmail,
+        GSI2PK: `USER#${userId}`,
+        GSI2SK: `APPOINTMENT#${appointmentId}`,
         requestedAt: new Date().toISOString(),
       }
     );

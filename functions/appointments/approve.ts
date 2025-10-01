@@ -5,7 +5,7 @@ import { Appointment, AppointmentStatus } from "../shared/types/appointment";
 const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
-  pathParameters?: { appointmentId?: string };
+  pathParameters?: { therapyId?: string; appointmentId?: string };
   requestContext?: {
     authorizer?: {
       claims?: {
@@ -23,14 +23,15 @@ export const handler = async (event: {
   }
 
   try {
+    const therapyId = event.pathParameters?.therapyId;
     const appointmentId = event.pathParameters?.appointmentId;
 
-    if (!appointmentId) {
-      return error(400, 'Appointment ID is required');
+    if (!therapyId || !appointmentId) {
+      return error(400, 'Therapy and appointment IDs are required');
     }
 
     const appointment = await dbService.getItem(
-      `APPOINTMENT#${appointmentId}`,
+      `THERAPY#${therapyId}`,
       `APPOINTMENT#${appointmentId}`
     );
 
@@ -39,7 +40,7 @@ export const handler = async (event: {
     }
 
     await dbService.updateItem(
-      `APPOINTMENT#${appointmentId}`,
+      `THERAPY#${therapyId}`,
       `APPOINTMENT#${appointmentId}`,
       {
         status: AppointmentStatus.OCCUPIED
