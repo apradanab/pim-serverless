@@ -63,6 +63,7 @@ export class UsersLambdaConstruct extends Construct {
     );
     props.authConstruct.userPool.grant(
       this.completeRegistration,
+      'cognito-idp:AdminInitiateAuth',
       'cognito-idp:AdminSetUserPassword'
     )
     props.authConstruct.userPool.grant(
