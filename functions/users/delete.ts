@@ -29,14 +29,15 @@ export const handler = async (event: {
   if (!userId) return error(400, 'Missing user id in path');
   if (!claims) return error(403, 'Unauthorized');
 
-  const isAdmin = claims['cognito:groups']?.includes('ADMIN') ?? false;
-  const isOwner = claims.sub === userId;
-
-  if (!isAdmin && !isOwner) return error(403, 'You are not allowed to delete this user');
 
   try {
     const user = await dbService.getItem(`USER#${userId}`, `USER#${userId}`);
     if (!user) return error(404, 'User not found');
+
+    const isAdmin = claims['cognito:groups']?.includes('ADMIN') ?? false;
+    const isOwner = claims.sub === user.cognitoId;
+
+    if (!isAdmin && !isOwner) return error(403, 'You are not allowed to delete this user');
 
     if (user.approved) {
       try {
