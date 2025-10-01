@@ -1,12 +1,11 @@
 import { DatabaseService } from "../../lib/constructs/services/database-service";
 import { ApiResponse, error, success } from "../shared/dynamo";
 import { Appointment } from "../shared/types/appointment";
+import { User } from "../shared/types/user";
 
 interface CognitoClaims {
   sub: string;
-  email?: string;
   'cognito:groups'?: string[];
-  [key: string]: unknown;
 }
 
 const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
@@ -20,21 +19,27 @@ export const handler = async (event: {
   };
 }): Promise<ApiResponse> => {
   try {
-    const userId = event.pathParameters?.userId;
     const claims = event.requestContext?.authorizer?.claims;
+    if(!claims) return error(403, 'Unauthorized');
 
-    if(!userId) return error(400, 'User ID is required');
-    if(!claims) return error(403, 'Unauthorized: missing claims');
+    const isAdmin = claims['cognito:groups']?.includes('ADMIN');
+    let targetUserId = claims.sub;
 
-    if (claims.sub !== userId && !claims['cognito:groups']?.includes('ADMIN')) {
-      return error(403, 'Forbidden: not allowed to access this resource')
+    if (isAdmin && event.pathParameters?.userId) {
+      const targetUser = await dbService.getItem(
+        `USER#${event.pathParameters.userId}`,
+        `USER#${event.pathParameters.userId}`
+      ) as unknown as User;
+
+      if (!targetUser?.cognitoId) return error(404, 'User not found');
+      targetUserId = targetUser.cognitoId;
     }
 
-    const appointments = await dbService.queryByUserId(userId);
-
+    const appointments = await dbService.queryByUserId(targetUserId);
     return success(appointments);
+
   } catch (err) {
-    console.error(`Error fetching user appointments`, err);
+    console.error('Error fetching appointments', err);
     return error(500, 'Internal Server Error');
   }
 };

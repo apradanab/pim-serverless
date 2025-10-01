@@ -1,11 +1,12 @@
 import { DatabaseService } from "../../lib/constructs/services/database-service";
 import { ApiResponse, error, success } from "../shared/dynamo";
 import { Appointment, AppointmentStatus } from "../shared/types/appointment";
+import { User } from "../shared/types/user";
 
 const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
-  pathParameters?: { appointmentId?: string };
+  pathParameters?: { therapyId?: string; appointmentId?: string };
   body?: string;
   requestContext?: {
     authorizer?: {
@@ -24,15 +25,20 @@ export const handler = async (event: {
   }
 
   try {
+    const therapyId = event.pathParameters?.therapyId;
     const appointmentId = event.pathParameters?.appointmentId;
-    const { userId } = JSON.parse(event.body || '{}') as { userId: string };
+    const { userEmail } = JSON.parse(event.body || '{}') as { userEmail: string };
 
-    if (!appointmentId || !userId) {
-      return error(400, 'Appointment ID and User ID are required');
+    if (!therapyId || !appointmentId || !userEmail) {
+      return error(400, 'Therapy, appointment, and user IDs are required');
     }
 
+    const users = await dbService.queryByEmail(userEmail);
+    const targetUser = users[0] as unknown as User;
+    if (!targetUser) return error(404, 'User not found');
+
     const appointment = await dbService.getItem(
-      `APPOINTMENT#${appointmentId}`,
+      `THERAPY#${therapyId}`,
       `APPOINTMENT#${appointmentId}`
     );
 
@@ -45,11 +51,14 @@ export const handler = async (event: {
     }
 
     await dbService.updateItem(
-      `APPOINTMENT#${appointmentId}`,
+      `THERAPY#${therapyId}`,
       `APPOINTMENT#${appointmentId}`,
       {
         status: AppointmentStatus.OCCUPIED,
-        userId: userId,
+        userId: targetUser.cognitoId,
+        userEmail: userEmail,
+        GSI2PK: `USER#${targetUser.cognitoId}`,
+        GSI2SK: `APPOINTMENT#${appointmentId}`,
       }
     );
 

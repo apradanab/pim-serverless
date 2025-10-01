@@ -5,7 +5,7 @@ import { Appointment, AppointmentStatus } from "../shared/types/appointment";
 const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
-  pathParameters?: { appointmentId?: string };
+  pathParameters?: { therapyId?: string; appointmentId?: string };
   body?: string;
   requestContext?: {
     authorizer?: {
@@ -16,16 +16,17 @@ export const handler = async (event: {
   };
 }): Promise<ApiResponse> => {
   try {
+    const therapyId = event.pathParameters?.therapyId;
     const appointmentId = event.pathParameters?.appointmentId;
     const { notes } = JSON.parse(event.body || '{}') as { notes: string };
     const userId = event.requestContext?.authorizer?.claims?.sub;
 
-    if(!appointmentId) return error(400, 'Appointment ID is required');
+    if(!therapyId || !appointmentId) return error(400, 'Therapy and appointment IDs are required');
     if(!notes) return error(400, 'Cancellation reason is required');
     if(!userId) return error(401, 'User authentication required');
 
     const appointment = await dbService.getItem(
-      `APPOINTMENT#${appointmentId}`,
+      `THERAPY#${therapyId}`,
       `APPOINTMENT#${appointmentId}`
     );
 
@@ -35,7 +36,7 @@ export const handler = async (event: {
     }
 
     await dbService.updateItem(
-      `APPOINTMENT#${appointmentId}`,
+      `THERAPY#${therapyId}`,
       `APPOINTMENT#${appointmentId}`,
       {
         status: AppointmentStatus.PENDING,

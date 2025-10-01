@@ -39,6 +39,8 @@ export const handler = async (event: {
       Type: 'Appointment',
       GSI1PK: `APPOINTMENT#${appointmentId}`,
       GSI1SK: `DATE#${input.date}`,
+      GSI2PK: `USER#`,
+      GSI2SK: `APPOINTMENT#${appointmentId}`,
       appointmentId,
       therapyId,
       date: input.date,
