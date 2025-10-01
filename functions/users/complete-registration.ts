@@ -21,6 +21,12 @@ const mediaService = new MediaService({
   maxSizeMB: 5
 });
 
+interface JwtPayload {
+  sub: string;
+  email?: string;
+  [key: string]: unknown;
+}
+
 export const handler = async (event: { body?: string }): Promise<ApiResponse> => {
   try {
     const input = JSON.parse(event.body || '{}') as UpdateUserInput;
@@ -37,10 +43,21 @@ export const handler = async (event: { body?: string }): Promise<ApiResponse> =>
 
     await cognitoService.setUserPassword(user.email, password);
 
+    const token = await cognitoService.login(email, password);
+    const tokenParts = token.split('.');
+    if (tokenParts.length !== 3) throw new Error('Invalid token format');
+
+    const payload = JSON.parse(
+      Buffer.from(tokenParts[1], 'base64').toString()
+    ) as JwtPayload;
+
+    const cognitoId = payload.sub;
+
     const updateData: Partial<User> = {
       name: input.name,
       role: 'USER',
       approved: true,
+      cognitoId: cognitoId,
     };
 
     if (input.avatarKey) {
