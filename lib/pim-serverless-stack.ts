@@ -5,6 +5,8 @@ import { LambdaConstruct } from './constructs/lambda/lambda-construct';
 import { ApiConstruct } from './constructs/api/rest-api';
 import { MediaBucket } from './constructs/storage/media-bucket';
 import { CognitoConstruct } from './constructs/auth/cognito-construct';
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
 
 export class PimServerlessStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -25,6 +27,12 @@ export class PimServerlessStack extends cdk.Stack {
       authConstruct: {
         userPool: authConstruct.userPool
       }
+     });
+
+     const _completePastRule = new events.Rule(this, 'CompletePastAppointmentsRule', {
+      ruleName: 'complete-past-appointments-hourly',
+      schedule: events.Schedule.rate(cdk.Duration.hours(1)),
+      targets: [new targets.LambdaFunction(lambdaConstruct.handlers.completePastAppointments)]
      });
 
      new cdk.CfnOutput(this, 'MediaCdnUrl', {
