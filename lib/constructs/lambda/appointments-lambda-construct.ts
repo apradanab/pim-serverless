@@ -22,6 +22,7 @@ export class AppointmentsLambdaConstruct extends Construct {
   public readonly assignAppointment: NodejsFunction;
   public readonly requestCancellation: NodejsFunction;
   public readonly approveCancellation: NodejsFunction;
+  public readonly completePastAppointments: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: AppointmentsLambdaProps) {
     super(scope, id);
@@ -37,6 +38,7 @@ export class AppointmentsLambdaConstruct extends Construct {
     this.assignAppointment = this.createHandler('Assign', 'appointments/assign.ts', props);
     this.requestCancellation = this.createHandler('RequestCancellation', 'appointments/request-cancellation.ts', props);
     this.approveCancellation = this.createHandler('ApproveCancellation', 'appointments/approve-cancellation.ts', props);
+    this.completePastAppointments = this.createHandler('CompletePast', 'appointments/complete-past.ts', props);
 
     const table = props.dbConstruct.dataTable;
     table.grantWriteData(this.createAppointment);
@@ -50,6 +52,7 @@ export class AppointmentsLambdaConstruct extends Construct {
     table.grantReadWriteData(this.assignAppointment);
     table.grantReadWriteData(this.requestCancellation);
     table.grantReadWriteData(this.approveCancellation);
+    table.grantReadWriteData(this.completePastAppointments);
   }
 
   private createHandler(id: string, handlerFile: string, props: AppointmentsLambdaProps): NodejsFunction {
