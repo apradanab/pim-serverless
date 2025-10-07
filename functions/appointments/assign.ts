@@ -1,9 +1,15 @@
 import { DatabaseService } from "../../lib/constructs/services/database-service";
+import { EmailService } from "../../lib/constructs/services/email-service";
 import { ApiResponse, error, success } from "../shared/dynamo";
 import { Appointment, AppointmentStatus } from "../shared/types/appointment";
+import { Therapy } from "../shared/types/therapy";
 import { User } from "../shared/types/user";
 
 const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
+const emailService = new EmailService({
+  region: process.env.REGION!,
+  sourceEmail: process.env.SOURCE_EMAIL!
+});
 
 export const handler = async (event: {
   pathParameters?: { therapyId?: string; appointmentId?: string };
@@ -61,6 +67,27 @@ export const handler = async (event: {
         GSI2SK: `APPOINTMENT#${appointmentId}`,
       }
     );
+
+    try {
+      const therapy = await dbService.getItem(
+        `THERAPY#${therapyId}`,
+        `THERAPY#${therapyId}`
+      );
+
+      if (therapy) {
+        const therapyData = therapy as unknown as Therapy;
+
+        await emailService.sendAppointmentConfirmation(
+          userEmail,
+          targetUser.name || userEmail.split('@')[0],
+          therapyData.title,
+          appointment.date,
+          `${appointment.startTime} - ${appointment.endTime}`
+        );
+      }
+    } catch (err) {
+      console.error('Failed to send confirmation email:', err);
+    }
 
     return success({ message: 'Appointment assigned successfully' });
   } catch (err) {
