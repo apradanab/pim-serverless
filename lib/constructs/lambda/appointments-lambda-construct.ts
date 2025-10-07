@@ -3,6 +3,7 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import { NodejsFunction, NodejsFunctionProps } from 'aws-cdk-lib/aws-lambda-nodejs';
 import * as path from 'path';
 import { DynamoDBConstruct } from '../data/dynamodb-construct';
+import * as iam from 'aws-cdk-lib/aws-iam';
 
 interface AppointmentsLambdaProps {
   dbConstruct: DynamoDBConstruct;
@@ -53,6 +54,21 @@ export class AppointmentsLambdaConstruct extends Construct {
     table.grantReadWriteData(this.requestCancellation);
     table.grantReadWriteData(this.approveCancellation);
     table.grantReadWriteData(this.completePastAppointments);
+
+    this.approveAppointment.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+      resources: ['*']
+    }));
+
+    this.approveCancellation.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+      resources: ['*']
+    }));
+
+    this.assignAppointment.addToRolePolicy(new iam.PolicyStatement({
+      actions: ['ses:SendEmail', 'ses:SendRawEmail'],
+      resources: ['*']
+    }))
   }
 
   private createHandler(id: string, handlerFile: string, props: AppointmentsLambdaProps): NodejsFunction {
