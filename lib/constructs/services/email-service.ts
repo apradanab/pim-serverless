@@ -36,4 +36,64 @@ export class EmailService {
 
     await this.ses.send(new SendEmailCommand(params));
   }
+
+  async sendAppointmentConfirmation(
+    to: string,
+    userName: string,
+    therapyTitle: string,
+    appointmentDate: string,
+    appointmentTime: string,
+  ) {
+    const params: SendEmailCommandInput = {
+      Source: this.config.sourceEmail,
+      Destination: { ToAddresses: [to] },
+      Message: {
+        Subject: { Data: `Confirmación de cita - ${therapyTitle}` },
+        Body: {
+          Html: {
+            Data: `
+              <h1>Confirmación de Cita</h1>
+              <p>Hola ${userName},</p>
+              <p>Tu cita para <strong>${therapyTitle}</strong> ha sido confirmada.</p>
+              <p><strong>Fecha:</strong> ${appointmentDate}</p>
+              <p><strong>Hora:</strong> ${appointmentTime}</p>
+              <p>Te esperamos en nuestro centro.</p>
+            `
+          }
+        }
+      }
+    };
+    await this.ses.send(new SendEmailCommand(params));
+  }
+
+  async sendAppointmentCancellation(
+    to: string,
+    userName: string,
+    therapyTitle: string,
+    appointmentDate: string,
+    appointmentTime: string,
+    cancellationReason?: string
+  ) {
+    const params: SendEmailCommandInput = {
+      Source: this.config.sourceEmail,
+      Destination: { ToAddresses: [to] },
+      Message: {
+        Subject: { Data: `Cancelación de cita - ${therapyTitle}` },
+        Body: {
+          Html: {
+            Data: `
+              <h1>Cancelación de Cita</h1>
+              <p>Hola ${userName},</p>
+              <p>Tu cita para <strong>${therapyTitle}</strong> ha sido cancelada.</p>
+              <p><strong>Fecha:</strong> ${appointmentDate}</p>
+              <p><strong>Hora:</strong> ${appointmentTime}</p>
+              ${cancellationReason ? `<p><strong>Motivo:</strong> ${cancellationReason}</p>` : ''}
+              <p>Puedes agendar una nueva cita cuando lo desees.</p>
+            `
+          }
+        }
+      }
+    };
+    await this.ses.send(new SendEmailCommand(params));
+  }
 }
