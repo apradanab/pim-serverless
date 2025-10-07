@@ -11,6 +11,7 @@ export interface Appointment extends DynamoItem {
   appointmentId: string;
   therapyId: string;
   userId?: string;
+  userEmail?: string;
   date: string;
   startTime: string;
   endTime: string;
