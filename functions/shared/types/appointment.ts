@@ -15,7 +15,10 @@ export interface Appointment extends DynamoItem {
   date: string;
   startTime: string;
   endTime: string;
-  status: 'AVAILABLE' | 'PENDING' | 'OCCUPIED' | 'COMPLETED' | 'CANCELLED';
+  participants?: UserParticipant[];
+  currentParticipants?: number;
+  maxParticipants?: number;
+  status: AppointmentStatus;
   notes?: string;
   adminNotes?: string;
   createdAt: string;
@@ -27,6 +30,7 @@ export interface CreateAppointmentInput {
   date: string;
   startTime: string;
   endTime: string;
+  maxParticipants?: number;
   notes?: string;
 }
 
@@ -45,4 +49,12 @@ export enum AppointmentStatus {
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
   AVAILABLE = 'AVAILABLE'
+}
+
+export interface UserParticipant {
+  userId: string;
+  userEmail: string;
+  userName: string;
+  joinedAt: string;
+  status: 'CONFIRMED' | 'CANCELLED';
 }
