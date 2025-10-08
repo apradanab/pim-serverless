@@ -12,6 +12,15 @@ export class EmailService {
     this.ses = new SESClient({ region: this.config.region });
   }
 
+  private formatDateES = (dateStr: string) => {
+    return new Date(dateStr + 'T00:00:00').toLocaleDateString('es-ES', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
   async sendApprovalEmail(to: string, name: string, token: string) {
     const domain = process.env.APP_DOMAIN || 'http://localhost:3000';
     const link = `${domain}/complete-register?token=${token}`;
@@ -44,6 +53,8 @@ export class EmailService {
     appointmentDate: string,
     appointmentTime: string,
   ) {
+    const formattedDate = this.formatDateES(appointmentDate);
+
     const params: SendEmailCommandInput = {
       Source: this.config.sourceEmail,
       Destination: { ToAddresses: [to] },
@@ -55,7 +66,7 @@ export class EmailService {
               <h1>Confirmación de Cita</h1>
               <p>Hola ${userName},</p>
               <p>Tu cita para <strong>${therapyTitle}</strong> ha sido confirmada.</p>
-              <p><strong>Fecha:</strong> ${appointmentDate}</p>
+              <p><strong>Fecha:</strong> ${formattedDate}</p>
               <p><strong>Hora:</strong> ${appointmentTime}</p>
               <p>Te esperamos en nuestro centro.</p>
             `
@@ -74,6 +85,8 @@ export class EmailService {
     appointmentTime: string,
     cancellationReason?: string
   ) {
+    const formattedDate = this.formatDateES(appointmentDate);
+
     const params: SendEmailCommandInput = {
       Source: this.config.sourceEmail,
       Destination: { ToAddresses: [to] },
@@ -85,7 +98,7 @@ export class EmailService {
               <h1>Cancelación de Cita</h1>
               <p>Hola ${userName},</p>
               <p>Tu cita para <strong>${therapyTitle}</strong> ha sido cancelada.</p>
-              <p><strong>Fecha:</strong> ${appointmentDate}</p>
+              <p><strong>Fecha:</strong> ${formattedDate}</p>
               <p><strong>Hora:</strong> ${appointmentTime}</p>
               ${cancellationReason ? `<p><strong>Motivo:</strong> ${cancellationReason}</p>` : ''}
               <p>Puedes agendar una nueva cita cuando lo desees.</p>
