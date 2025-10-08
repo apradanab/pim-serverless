@@ -3,6 +3,7 @@ import { EmailService } from "../../lib/constructs/services/email-service";
 import { ApiResponse, error, success } from "../shared/dynamo";
 import { Appointment, AppointmentStatus } from "../shared/types/appointment";
 import { Therapy } from "../shared/types/therapy";
+import { User } from "../shared/types/user";
 
 const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 const emailService = new EmailService({
@@ -43,7 +44,7 @@ export const handler = async (event: {
     if(!appointment) return error(404, 'Appointment not found');
 
     if (appointment.status !== AppointmentStatus.PENDING) {
-      return error(400, 'Onli pending appointments are allowed for cancellation');
+      return error(400, 'Only pending appointments are allowed for cancellation');
     }
 
     await dbService.updateItem(
@@ -61,12 +62,15 @@ export const handler = async (event: {
           `THERAPY#${therapyId}`
         );
 
+        const users = await dbService.queryByEmail(appointment.userEmail);
+        const targetUser = users[0] as unknown as User;
+
         if (therapy) {
           const therapyData = therapy as unknown as Therapy;
 
           await emailService.sendAppointmentCancellation(
             appointment.userEmail,
-            appointment.userEmail.split('@')[0],
+            targetUser.name || appointment.userEmail.split('@')[0],
             therapyData.title,
             appointment.date,
             `${appointment.startTime} - ${appointment.endTime}`
