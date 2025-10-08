@@ -30,10 +30,15 @@ export const handler = async (event: {
       `APPOINTMENT#${appointmentId}`
     );
 
-    if (!appointment) return error(404, 'Appointmetn not found');
+    if (!appointment) return error(404, 'Appointment not found');
+
+    const maxParticipants = appointment.maxParticipants || 1;
+    if (maxParticipants > 1) {
+      return error(400, 'Use join-group endpoint for group appointments')
+    }
 
     if (appointment.status !== AppointmentStatus.AVAILABLE) {
-      return error(400, 'Appointment is nor available for booking');
+      return error(400, 'Appointment is not available for booking');
     }
 
     await dbService.updateItem(
