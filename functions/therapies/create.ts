@@ -50,7 +50,7 @@ export const handler = async (event: {
       title: input.title,
       description: input.description,
       content: input.content,
-      isGroup: input.isGroup || false,
+      maxParticipants: input.maxParticipants || 1,
       createdAt: new Date().toISOString()
     };
 

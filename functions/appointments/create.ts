@@ -1,7 +1,8 @@
 import { ApiResponse, error, success } from '../shared/dynamo';
 import { v4 as uuidv4 } from 'uuid';
-import { Appointment, CreateAppointmentInput } from '../shared/types/appointment';
+import { Appointment, AppointmentStatus, CreateAppointmentInput } from '../shared/types/appointment';
 import { DatabaseService } from '../../lib/constructs/services/database-service';
+import { Therapy } from '../shared/types/therapy';
 
 const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 
@@ -32,7 +33,16 @@ export const handler = async (event: {
   }
 
   try {
+    const therapy = await dbService.getItem(
+      `THERAPY#${therapyId}`,
+      `THERAPY#${therapyId}`
+    ) as unknown as Therapy;
+
+    if (!therapy) return error(404, 'Therapy not found');
+
     const appointmentId = uuidv4();
+    const maxParticipants = input.maxParticipants || therapy.maxParticipants;
+
     const newAppointment: Appointment = {
       PK: `THERAPY#${therapyId}`,
       SK: `APPOINTMENT#${appointmentId}`,
@@ -46,7 +56,10 @@ export const handler = async (event: {
       date: input.date,
       startTime: input.startTime,
       endTime: input.endTime,
-      status: 'AVAILABLE',
+      maxParticipants,
+      currentParticipants: 0,
+      participants: [],
+      status: AppointmentStatus.AVAILABLE,
       notes: input.notes,
       createdAt: new Date().toISOString(),
     };

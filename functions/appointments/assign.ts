@@ -52,31 +52,64 @@ export const handler = async (event: {
       return error(404, 'Appointment not found');
     }
 
-    if (appointment.status !== AppointmentStatus.AVAILABLE) {
+    const maxParticipants = appointment.maxParticipants || 1;
+    const currentParticipants = appointment.currentParticipants || 0;
+
+    if (appointment.status !== AppointmentStatus.AVAILABLE &&
+        appointment.status !== AppointmentStatus.OCCUPIED) {
       return error(400, 'Appointment is not available for assignment');
     }
 
-    await dbService.updateItem(
+    if (maxParticipants > 1 && currentParticipants >= maxParticipants) {
+      return error(400, 'Group appointment is full');
+    }
+
+    let updateData: Partial<Appointment> = {};
+    const therapy = await dbService.getItem(
       `THERAPY#${therapyId}`,
-      `APPOINTMENT#${appointmentId}`,
-      {
+      `THERAPY#${therapyId}`
+    );
+
+    if (maxParticipants === 1) {
+      updateData = {
         status: AppointmentStatus.OCCUPIED,
         userId: targetUser.cognitoId,
         userEmail: userEmail,
         GSI2PK: `USER#${targetUser.cognitoId}`,
         GSI2SK: `APPOINTMENT#${appointmentId}`,
+      };
+    }
+    else {
+      const updatedParticipants = [
+        ...(appointment.participants || []),
+        {
+          userId: targetUser.cognitoId!,
+          userEmail: userEmail,
+          userName: targetUser.name || userEmail.split('@')[0],
+          joinedAt: new Date().toISOString(),
+          status: 'CONFIRMED' as const
+        }
+      ];
+
+      updateData = {
+        participants: updatedParticipants,
+        currentParticipants: updatedParticipants.length
+      };
+
+      if (updatedParticipants.length === maxParticipants) {
+        updateData.status = AppointmentStatus.OCCUPIED;
       }
+    }
+
+    await dbService.updateItem(
+      `THERAPY#${therapyId}`,
+      `APPOINTMENT#${appointmentId}`,
+      updateData
     );
 
     try {
-      const therapy = await dbService.getItem(
-        `THERAPY#${therapyId}`,
-        `THERAPY#${therapyId}`
-      );
-
       if (therapy) {
         const therapyData = therapy as unknown as Therapy;
-
         await emailService.sendAppointmentConfirmation(
           userEmail,
           targetUser.name || userEmail.split('@')[0],
