@@ -18,7 +18,7 @@ export interface Therapy extends DynamoItem {
   description: string;
   content: string;
   image?: TherapyImage;
-  isGroup: boolean;
+  maxParticipants: number;
   createdAt: string;
 }
 
@@ -27,7 +27,7 @@ export interface CreateTherapyInput {
   description: string;
   content: string;
   imageKey?: string;
-  isGroup?: boolean;
+  maxParticipants: number;
 }
 
 export interface UpdateTherapyInput extends Partial<Therapy> {
@@ -35,5 +35,4 @@ export interface UpdateTherapyInput extends Partial<Therapy> {
   description?: string;
   content?: string;
   imageKey?: string;
-  isGroup?: boolean;
 }
