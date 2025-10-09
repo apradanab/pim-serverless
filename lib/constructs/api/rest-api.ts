@@ -35,6 +35,9 @@ interface ApiConstructProps {
     assignAppointment: NodejsFunction;
     requestCancellation: NodejsFunction;
     approveCancellation: NodejsFunction;
+    joinGroupAppointment: NodejsFunction;
+    leaveGroupAppointment: NodejsFunction;
+    listParticipants: NodejsFunction;
 
     createUser: NodejsFunction;
     approveUser: NodejsFunction;
@@ -60,7 +63,7 @@ export class ApiConstruct extends Construct {
     super(scope, id);
 
     this.api = new apigateway.RestApi(this, 'PimApi', {
-      restApiName: 'PIM Service',
+      restApiName: 'PIM API',
       description: 'Therapy, Advice, Appointments, and Users management API',
       defaultCorsPreflightOptions: {
         allowOrigins: apigateway.Cors.ALL_ORIGINS,
@@ -131,6 +134,9 @@ export class ApiConstruct extends Construct {
         assignAppointment: props.lambdaHandlers.assignAppointment,
         requestCancellation: props.lambdaHandlers.requestCancellation,
         approveCancellation: props.lambdaHandlers.approveCancellation,
+        joinGroupAppointment: props.lambdaHandlers.joinGroupAppointment,
+        leaveGroupAppointment: props.lambdaHandlers.leaveGroupAppointment,
+        listParticipants: props.lambdaHandlers.listParticipants,
       },
     });
 

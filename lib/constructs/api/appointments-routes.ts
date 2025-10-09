@@ -16,6 +16,9 @@ interface AppointmentsRoutesProps {
     assignAppointment: NodejsFunction;
     requestCancellation: NodejsFunction;
     approveCancellation: NodejsFunction;
+    joinGroupAppointment: NodejsFunction;
+    leaveGroupAppointment: NodejsFunction;
+    listParticipants: NodejsFunction;
   };
 }
 
@@ -45,6 +48,11 @@ export class AppointmentsRoutesConstruct extends Construct {
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
 
+    appointmentById?.addResource('participants').addMethod('GET', new apigateway.LambdaIntegration(props.handlers.listParticipants), {
+      authorizer: props.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+
     const appointmentActions = appointmentById?.addResource('actions');
     appointmentActions?.addResource('request').addMethod('POST', new apigateway.LambdaIntegration(props.handlers.requestAppointment), {
       authorizer: props.authorizer,
@@ -63,6 +71,14 @@ export class AppointmentsRoutesConstruct extends Construct {
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
     appointmentActions?.addResource('approve-cancellation').addMethod('POST', new apigateway.LambdaIntegration(props.handlers.approveCancellation), {
+      authorizer: props.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+    appointmentActions?.addResource('join-group').addMethod('POST', new apigateway.LambdaIntegration(props.handlers.joinGroupAppointment), {
+      authorizer: props.authorizer,
+      authorizationType: apigateway.AuthorizationType.COGNITO,
+    });
+    appointmentActions?.addResource('leave-group').addMethod('POST', new apigateway.LambdaIntegration(props.handlers.leaveGroupAppointment), {
       authorizer: props.authorizer,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
