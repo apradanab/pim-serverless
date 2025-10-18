@@ -48,7 +48,7 @@ export class AppointmentsLambdaConstruct extends Construct {
     this.completePastAppointments = this.createHandler('CompletePast', 'appointments/complete-past.ts', props);
 
     const table = props.dbConstruct.dataTable;
-    table.grantWriteData(this.createAppointment);
+    table.grantReadWriteData(this.createAppointment);
     table.grantReadData(this.listAppointments);
     table.grantReadData(this.getAppointment);
     table.grantReadWriteData(this.updateAppointment);
