@@ -72,7 +72,8 @@ export class LambdaConstruct extends Construct {
       USER_POOL_ID: props.authConstruct.userPool.userPoolId,
       USER_POOL_CLIENT_ID: props.authConstruct.userPoolClient.userPoolClientId,
       REGION: cdk.Stack.of(this).region,
-      SOURCE_EMAIL: 'apradanab@gmail.com'
+      SOURCE_EMAIL: 'apradanab@gmail.com',
+      APP_DOMAIN: 'http://localhost:4200'
     };
 
     const commonProps = {
