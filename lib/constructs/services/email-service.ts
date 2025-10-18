@@ -22,7 +22,7 @@ export class EmailService {
   };
 
   async sendApprovalEmail(to: string, name: string, token: string) {
-    const domain = process.env.APP_DOMAIN || 'http://localhost:3000';
+    const domain = process.env.APP_DOMAIN || 'http://localhost:4200';
     const link = `${domain}/complete-register?token=${token}`;
 
     const params: SendEmailCommandInput = {
