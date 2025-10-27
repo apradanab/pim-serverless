@@ -27,6 +27,7 @@ export class AppointmentsLambdaConstruct extends Construct {
   public readonly leaveGroupAppointment: NodejsFunction;
   public readonly listParticipants: NodejsFunction;
   public readonly completePastAppointments: NodejsFunction;
+  public readonly deleteExpiredAppointments: NodejsFunction;
 
   constructor(scope: Construct, id: string, props: AppointmentsLambdaProps) {
     super(scope, id);
@@ -46,6 +47,7 @@ export class AppointmentsLambdaConstruct extends Construct {
     this.leaveGroupAppointment = this.createHandler('LeaveGroup', 'appointments/leave-group.ts', props);
     this.listParticipants = this.createHandler('ListParticipants', 'appointments/list-participants.ts', props);
     this.completePastAppointments = this.createHandler('CompletePast', 'appointments/complete-past.ts', props);
+    this.deleteExpiredAppointments = this.createHandler('DeleteExpired', 'appointments/delete-expired.ts', props);
 
     const table = props.dbConstruct.dataTable;
     table.grantReadWriteData(this.createAppointment);
@@ -63,6 +65,7 @@ export class AppointmentsLambdaConstruct extends Construct {
     table.grantReadWriteData(this.leaveGroupAppointment);
     table.grantReadData(this.listParticipants);
     table.grantReadWriteData(this.completePastAppointments);
+    table.grantReadWriteData(this.deleteExpiredAppointments);
 
     this.approveAppointment.addToRolePolicy(new iam.PolicyStatement({
       actions: ['ses:SendEmail', 'ses:SendRawEmail'],

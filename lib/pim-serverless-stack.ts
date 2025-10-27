@@ -35,6 +35,12 @@ export class PimServerlessStack extends cdk.Stack {
       targets: [new targets.LambdaFunction(lambdaConstruct.handlers.completePastAppointments)]
      });
 
+     const _deleteExpiredRule = new events.Rule(this, 'DeleteExpiredAptsRule', {
+      ruleName: 'delete-expired-available-apts-hourly',
+      schedule: events.Schedule.rate(cdk.Duration.hours(1)),
+      targets: [new targets.LambdaFunction(lambdaConstruct.handlers.deleteExpiredAppointments)]
+     });
+
      new cdk.CfnOutput(this, 'MediaCdnUrl', {
       value: storageConstruct.distribution.distributionDomainName
      })
