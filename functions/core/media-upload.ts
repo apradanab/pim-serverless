@@ -7,7 +7,7 @@ const s3 = new S3Client({ region: process.env.AWS_REGION });
 export const handler = async (event: {
   pathParameters?: {
     id: string,
-    type: 'therapy' | 'advice'
+    type: 'therapy' | 'advice' | 'avatar'
   },
   queryStringParameters?: {
     contentType?: string
