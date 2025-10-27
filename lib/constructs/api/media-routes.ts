@@ -18,8 +18,7 @@ export class MediaRoutesConstruct extends Construct {
     const mediaType = media.addResource('{type}');
     const mediaTypeAndId = mediaType.addResource('{id}');
     mediaTypeAndId.addMethod('PUT', new apigateway.LambdaIntegration(props.handlers.mediaUpload), {
-      authorizer: props.authorizer,
-      authorizationType: apigateway.AuthorizationType.COGNITO,
+      authorizationType: apigateway.AuthorizationType.NONE,
     });
   }
 }
