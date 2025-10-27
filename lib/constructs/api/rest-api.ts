@@ -8,6 +8,7 @@ import { TherapiesRoutesConstruct } from './therapies-routes';
 import { AdvicesRoutesConstruct } from './advices-routes';
 import { AppointmentsRoutesConstruct } from './appointments-routes';
 import { UsersRoutesConstruct } from './users-routes';
+import * as cdk from 'aws-cdk-lib';
 
 interface ApiConstructProps {
   lambdaHandlers: {
@@ -58,6 +59,8 @@ interface ApiConstructProps {
 export class ApiConstruct extends Construct {
   public readonly api: apigateway.RestApi;
   public readonly authorizer: apigateway.CognitoUserPoolsAuthorizer;
+  public readonly mediaApiKey: apigateway.ApiKey;
+  public readonly mediaUsagePlan: apigateway.UsagePlan;
 
   constructor(scope: Construct, id: string, props: ApiConstructProps) {
     super(scope, id);
@@ -78,6 +81,34 @@ export class ApiConstruct extends Construct {
     });
     this.authorizer._attachToApi(this.api);
 
+    this.mediaApiKey = new apigateway.ApiKey(this, 'MediaUploadApiKey', {
+      apiKeyName: 'MediaUploadKey',
+      description: 'Key for media uploads during user registration flow.'
+    });
+
+    this.mediaUsagePlan = new apigateway.UsagePlan(this, 'MediaUploadUsagePlan', {
+      name: 'MediaUploadPlan',
+      throttle: {
+        rateLimit: 5,
+        burstLimit: 10,
+      }
+    });
+
+    new apigateway.CfnUsagePlanKey(this, 'MediaUploadUsagePlanKey', {
+      keyId: this.mediaApiKey.keyId,
+      keyType: 'API_KEY',
+      usagePlanId: this.mediaUsagePlan.usagePlanId,
+    });
+
+    this.mediaUsagePlan.addApiStage({
+      stage: this.api.deploymentStage,
+    });
+
+    new cdk.CfnOutput(this, 'MediaUploadKeyId', {
+      value: this.mediaApiKey.keyId,
+      description: 'ApiKey ID required for media uploads'
+    });
+
     new AuthRoutesConstruct(this, 'AuthRoutes', {
       api: this.api,
       handlers: {
@@ -89,10 +120,10 @@ export class ApiConstruct extends Construct {
 
     new MediaRoutesConstruct(this, 'MediaRoutes', {
       api: this.api,
-      authorizer: this.authorizer,
       handlers: {
         mediaUpload: props.lambdaHandlers.mediaUpload,
       },
+      apiKey: this.mediaApiKey,
     });
 
     new TherapiesRoutesConstruct(this, 'TherapiesRoutes', {

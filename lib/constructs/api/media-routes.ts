@@ -4,7 +4,7 @@ import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
 
 interface MediaRoutesProps {
   api: apigateway.RestApi;
-  authorizer: apigateway.CognitoUserPoolsAuthorizer;
+  apiKey: apigateway.ApiKey;
   handlers: {
     mediaUpload: NodejsFunction;
   };
@@ -18,7 +18,7 @@ export class MediaRoutesConstruct extends Construct {
     const mediaType = media.addResource('{type}');
     const mediaTypeAndId = mediaType.addResource('{id}');
     mediaTypeAndId.addMethod('PUT', new apigateway.LambdaIntegration(props.handlers.mediaUpload), {
-      authorizationType: apigateway.AuthorizationType.NONE,
+      apiKeyRequired: true,
     });
   }
 }
