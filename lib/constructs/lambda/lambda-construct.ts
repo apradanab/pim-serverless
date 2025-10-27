@@ -46,6 +46,7 @@ export interface AllLambdaHandlers {
   leaveGroupAppointment: NodejsFunction;
   listParticipants: NodejsFunction;
   completePastAppointments: NodejsFunction;
+  deleteExpiredAppointments: NodejsFunction;
 
   createUser: NodejsFunction;
   approveUser: NodejsFunction;
@@ -144,6 +145,7 @@ export class LambdaConstruct extends Construct {
       leaveGroupAppointment: appointments.leaveGroupAppointment,
       listParticipants: appointments.listParticipants,
       completePastAppointments: appointments.completePastAppointments,
+      deleteExpiredAppointments: appointments.deleteExpiredAppointments,
 
       createUser: users.createUser,
       approveUser: users.approveUser,
