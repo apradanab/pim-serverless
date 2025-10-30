@@ -1,11 +1,12 @@
 import { DatabaseService } from "../../lib/constructs/services/database-service";
 import { ApiResponse, error, success } from "../shared/dynamo";
-import { Appointment, AppointmentStatus } from "../shared/types/appointment";
+import { Appointment, AppointmentStatus, RequestAppointmentInput } from "../shared/types/appointment";
 
 const dbService = new DatabaseService<Appointment>(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
   pathParameters?: { therapyId: string; appointmentId?: string };
+  body?: string;
   requestContext?: {
     authorizer?: {
       claims?: {
@@ -20,6 +21,16 @@ export const handler = async (event: {
     const appointmentId = event.pathParameters?.appointmentId;
     const userId = event.requestContext?.authorizer?.claims?.sub;
     const userEmail = event.requestContext?.authorizer?.claims?.email;
+
+    let notes: string | undefined;
+    if (event.body) {
+      try {
+        const requestBody = JSON.parse(event.body) as RequestAppointmentInput;
+        notes = requestBody.notes;
+      } catch (err) {
+        console.error('Error parsing request body:', err)
+      }
+    }
 
     if(!therapyId || !appointmentId) return error(400, 'Therapy and appointment ID are required');
 
@@ -51,6 +62,7 @@ export const handler = async (event: {
         GSI2PK: `USER#${userId}`,
         GSI2SK: `APPOINTMENT#${appointmentId}`,
         requestedAt: new Date().toISOString(),
+        notes: notes,
       }
     );
 

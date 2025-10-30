@@ -58,3 +58,5 @@ export interface UserParticipant {
   joinedAt: string;
   status: 'CONFIRMED' | 'CANCELLED';
 }
+
+export type RequestAppointmentInput = Pick<Appointment, 'notes'>;
