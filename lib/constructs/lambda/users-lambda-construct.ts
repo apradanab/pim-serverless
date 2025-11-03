@@ -68,7 +68,8 @@ export class UsersLambdaConstruct extends Construct {
     )
     props.authConstruct.userPool.grant(
       this.updateUser,
-      'cognito-idp:AdminSetUserPassword'
+      'cognito-idp:AdminSetUserPassword',
+      'cognito-idp:AdminUpdateUserAttributes'
     );
     props.authConstruct.userPool.grant(
       this.deleteUser,
