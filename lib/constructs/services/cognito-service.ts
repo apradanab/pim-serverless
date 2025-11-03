@@ -8,6 +8,8 @@ import {
   AdminSetUserPasswordCommandInput,
   AdminSetUserPasswordCommand,
   AdminDeleteUserCommand,
+  AdminUpdateUserAttributesCommandInput,
+  AdminUpdateUserAttributesCommand,
 } from '@aws-sdk/client-cognito-identity-provider';
 
 interface CognitoConfig {
@@ -72,6 +74,22 @@ export class CognitoService {
     };
 
     const command = new AdminSetUserPasswordCommand(input);
+    await this.client.send(command);
+  }
+
+  async updateUserAttribute(email: string, attributeName: string, attributeValue: string) {
+    const input: AdminUpdateUserAttributesCommandInput = {
+      UserPoolId: this.config.userPoolId,
+      Username: email,
+      UserAttributes: [
+        {
+          Name: attributeName,
+          Value: attributeValue,
+        },
+      ],
+    };
+
+    const command = new AdminUpdateUserAttributesCommand(input);
     await this.client.send(command);
   }
 
