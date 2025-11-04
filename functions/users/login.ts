@@ -38,6 +38,7 @@ export const handler = async (event: { body?: string }): Promise<ApiResponse> =>
         role: user.role,
         avatar: user.avatar || null,
         approved: user.approved,
+        createdAt: user.createdAt,
       }
     });
 
