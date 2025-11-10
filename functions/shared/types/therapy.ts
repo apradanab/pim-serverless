@@ -19,6 +19,7 @@ export interface Therapy extends DynamoItem {
   content: string;
   image?: TherapyImage;
   maxParticipants: number;
+  bgColor?: string;
   createdAt: string;
 }
 
@@ -28,6 +29,7 @@ export interface CreateTherapyInput {
   content: string;
   imageKey?: string;
   maxParticipants: number;
+  bgColor?: string;
 }
 
 export interface UpdateTherapyInput extends Partial<Therapy> {
@@ -35,4 +37,6 @@ export interface UpdateTherapyInput extends Partial<Therapy> {
   description?: string;
   content?: string;
   imageKey?: string;
+  maxParticipants?: number;
+  bgColor?: string;
 }
