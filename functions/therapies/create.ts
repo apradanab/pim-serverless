@@ -51,6 +51,7 @@ export const handler = async (event: {
       description: input.description,
       content: input.content,
       maxParticipants: input.maxParticipants || 1,
+      bgColor: input.bgColor || '#ccc',
       createdAt: new Date().toISOString()
     };
 
