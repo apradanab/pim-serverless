@@ -6,18 +6,22 @@ const dbService = new DatabaseService<User>(process.env.TABLE_NAME!);
 
 export const handler = async (event: {
   pathParameters?: { userId?: string };
+  requestContext: {
+    authorizer: {
+      claims: { email: string }
+    }
+  }
 }): Promise<ApiResponse> => {
-  const userId = event.pathParameters?.userId;
+  const email = event.requestContext.authorizer.claims.email;
 
-  if (!userId) return error(400, 'Missing user id in path');
+  if (!email) return error(401, 'Authorization context error: Email not found');
 
   try {
-    const user = await dbService.getItem(
-      `USER#${userId}`,
-      `USER#${userId}`
-    );
+    const result = await dbService.queryByEmail(email);
 
-    if (!user) return error(404, 'User not found');
+    if (!result || result.length === 0) return error(404, 'User profile not found in database for this email');
+
+    const user = result[0];
 
     return success(user);
   } catch (err) {
