@@ -26,21 +26,24 @@ export class DatabaseService<T extends DynamoItem> {
     return result.Item as T;
   }
 
-  async updateItem(pk: string, sk:string, attributes: Partial<T>): Promise<void> {
-    if (!Object.keys(attributes).length) {
+  async updateItem(pk: string, sk:string, inputAttributes: Partial<T>): Promise<void> {
+    const { PK: _PK, SK: _SK, ...restOfAttributes } = inputAttributes;
+    const updatableAttributes = restOfAttributes;
+
+    if (!Object.keys(updatableAttributes).length) {
       throw new Error('Noattributes provided')
     }
 
-    const updateExpression = `SET ${Object.keys(attributes).map(k => `#${k} = :${k}`).join(', ')}`;
+    const updateExpression = `SET ${Object.keys(updatableAttributes).map(k => `#${k} = :${k}`).join(', ')}`;
 
-    const expressionAttributeNames = Object.keys(attributes).reduce((acc, key) => ({
+    const expressionAttributeNames = Object.keys(updatableAttributes).reduce((acc, key) => ({
       ...acc,
       [`#${key}`]: key
     }), {});
 
-    const expressionAttributeValues = Object.keys(attributes).reduce((acc, key) => ({
+    const expressionAttributeValues = Object.keys(updatableAttributes).reduce((acc, key) => ({
       ...acc,
-      [`:${key}`]: attributes[key as keyof T]
+      [`:${key}`]: updatableAttributes[key as keyof typeof updatableAttributes]
     }), {});
 
     await this.docClient.send(new UpdateCommand({

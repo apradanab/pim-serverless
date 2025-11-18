@@ -44,21 +44,33 @@ export const handler = async (event: {
       `THERAPY#${therapyId}`,
       `THERAPY#${therapyId}`
     );
-    const updateData: Partial<Therapy> = { ...input };
 
-    if (input.imageKey) {
-      const metadata = await mediaService.getMediaMetadata(input.imageKey);
+    if (!therapy) {
+      return error(404, "Therapy not found");
+    }
+
+    const updateData: Partial<Therapy> = { ...input };
+    const newImageKey = input.image?.key;
+    const currentDBImageKey = therapy.image?.key;
+    let oldImageKey: string | undefined;
+
+    if (newImageKey && newImageKey !== currentDBImageKey) {
+      oldImageKey = currentDBImageKey;
+      const metadata = await mediaService.getMediaMetadata(newImageKey);
+
       updateData.image = {
-        key: input.imageKey,
-        url: `https://${process.env.CDN_DOMAIN}/${input.imageKey}`,
+        key: newImageKey,
+        url: `https://${process.env.CDN_DOMAIN}/${newImageKey}`,
         size: metadata.size,
         contentType: metadata.contentType
       }
-    }
+    } else if (input.image === null) {
+      delete updateData.image;
+      oldImageKey = currentDBImageKey;
 
-    if (therapy?.image?.key) {
-      await mediaService.deleteMedia(therapy.image.key)
-      .catch(error => console.error('Error deleting previous image:', error));
+    } else if (currentDBImageKey && newImageKey === currentDBImageKey) {
+      updateData.image = therapy.image;
+
     }
 
     await dbService.updateItem(
@@ -67,12 +79,17 @@ export const handler = async (event: {
       updateData
     )
 
+    if (oldImageKey) {
+      await mediaService.deleteMedia(oldImageKey).catch(error => console.error('Error deleting previous image:', error));
+    }
+
     return success({ message: 'Therapy updated successfully' });
   } catch (err) {
     console.error('Error updating therapy:', err);
 
-    if (input.imageKey) {
-      await mediaService.deleteMedia(input.imageKey)
+    const failedImageKey = input.image?.key;
+    if (failedImageKey) {
+      await mediaService.deleteMedia(failedImageKey)
         .catch(e => console.error('Failed to cleanup image:', e));
     }
     return error(500, 'Internal Server Error');
