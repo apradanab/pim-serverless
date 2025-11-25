@@ -39,7 +39,7 @@ export const handler = async (event: {
       `THERAPY#${therapyId}`,
       `APPOINTMENT#${appointmentId}`,
       {
-        status: AppointmentStatus.PENDING,
+        status: AppointmentStatus.CANCELLATION_PENDING,
         notes,
       }
     );
