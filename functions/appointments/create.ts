@@ -66,13 +66,7 @@ export const handler = async (event: {
 
     await dbService.createItem(newAppointment);
 
-    return success({
-      message: 'Appointment created successfully',
-      data: {
-        appointmentId,
-        therapyId,
-      },
-    });
+    return success(newAppointment);
   } catch (err) {
     console.error('Error creating appointment', err);
     return error(500, 'Internal Server Error');
