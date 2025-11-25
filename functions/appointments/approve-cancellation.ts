@@ -43,7 +43,7 @@ export const handler = async (event: {
 
     if(!appointment) return error(404, 'Appointment not found');
 
-    if (appointment.status !== AppointmentStatus.PENDING) {
+    if (appointment.status !== AppointmentStatus.CANCELLATION_PENDING) {
       return error(400, 'Only pending appointments are allowed for cancellation');
     }
 
