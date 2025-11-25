@@ -45,6 +45,7 @@ export interface UpdateAppointmentInput extends Partial<Appointment> {
 
 export enum AppointmentStatus {
   PENDING = 'PENDING',
+  CANCELLATION_PENDING = 'CANCELLATION_PENDING',
   OCCUPIED = 'OCCUPIED',
   COMPLETED = 'COMPLETED',
   CANCELLED = 'CANCELLED',
