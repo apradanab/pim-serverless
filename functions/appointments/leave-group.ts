@@ -21,7 +21,6 @@ export const handler = async (event: {
     const therapyId = event.pathParameters?.therapyId;
     const appointmentId = event.pathParameters?.appointmentId;
     const userId = event.requestContext?.authorizer?.claims?.sub;
-    const { cancellationReason } = JSON.parse(event.body || '{}') as { cancellationReason?: string };
 
     if (!therapyId || !appointmentId) {
       return error(400, 'Therapy and appointment IDs are required');
@@ -46,34 +45,22 @@ export const handler = async (event: {
     }
 
     const currentParticipants = appointment.participants || [];
-    const userParticipant = currentParticipants.find(p =>
-      p.userId === userId && p.status === 'CONFIRMED'
-    );
+    const isParticipant = currentParticipants.some(p => p.userId === userId);
 
-    if (!userParticipant) {
+    if (!isParticipant) {
       return error(400, 'User is not actively joined to this appointment');
     }
 
-    const updatedParticipants = currentParticipants.map(p =>
-      p.userId === userId
-        ? {
-            ...p,
-            status: 'CANCELLED' as const,
-            cancelledAt: new Date().toISOString(),
-            cancellationReason: cancellationReason
-          }
-        : p
-    );
-
-    const activeParticipants = updatedParticipants.filter(p => p.status === 'CONFIRMED');
+    const updatedParticipants = currentParticipants.filter(p => p.userId !== userId);
+    const activeParticipantsLength = updatedParticipants.length;
 
     const updateData: Partial<Appointment> = {
       participants: updatedParticipants,
-      currentParticipants: activeParticipants.length
+      currentParticipants: activeParticipantsLength
     };
 
     if (appointment.status === AppointmentStatus.OCCUPIED &&
-        activeParticipants.length < maxParticipants) {
+        activeParticipantsLength < maxParticipants) {
       updateData.status = AppointmentStatus.AVAILABLE;
     }
 
@@ -85,7 +72,7 @@ export const handler = async (event: {
 
     return success({
       message: 'Successfully cancelled group appointment participation',
-      currentParticipants: activeParticipants.length,
+      currentParticipants: activeParticipantsLength,
       maxParticipants: maxParticipants
     });
 
