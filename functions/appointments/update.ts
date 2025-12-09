@@ -30,6 +30,10 @@ export const handler = async (event: {
 
   const input = JSON.parse(event.body || '{}') as UpdateAppointmentInput;
 
+  if (!('notes' in input)) {
+    return error(400, 'The notes field is required');
+  }
+
   try {
     await dbService.updateItem(
       `THERAPY#${therapyId}`,
@@ -37,7 +41,12 @@ export const handler = async (event: {
       input
     );
 
-    return success({ messsage: 'Appointment updated successfully'});
+    const updatedAppt = await dbService.getItem(
+      `THERAPY#${therapyId}`,
+      `APPOINTMENT#${appointmentId}`
+    );
+
+    return success(updatedAppt);
   } catch (err) {
     console.error('Error updating appointment:', err);
     return error(500, 'Internal Server Error');
