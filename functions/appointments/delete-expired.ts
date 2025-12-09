@@ -7,25 +7,29 @@ export const handler = async (): Promise<{ deleted: number; errors: number }> =>
 
   try {
     const now = new Date();
-    const allApts = await dbService.queryByType('Appointment');
+    const allAppts = await dbService.queryByType('Appointment');
 
-    const expiredAvailableApts = allApts.filter(apt => {
-      if (apt.status !== AppointmentStatus.AVAILABLE) {
-        return false;
-      }
+    const expiredAvailableAppts = allAppts.filter(appt => {
+      if (appt.status !== AppointmentStatus.AVAILABLE) return false;
 
-      if (!apt.date || !apt.endTime) {
-        return false;
-      }
+      if (!appt.date || !appt.endTime) return false;
 
-      const endDateTime = new Date(`${apt.date}T${apt.endTime}:00Z`);
-      return endDateTime < now;
+      const endDateTime = new Date(`${appt.date}T${appt.endTime}:00Z`);
+      if (endDateTime >= now) return false;
+
+      const maxParticipants = appt.maxParticipants ?? 0;
+      const isGroupAppt = maxParticipants > 1;
+      const hasParticipants = (appt.participants?.length ?? 0) > 0;
+
+      if (isGroupAppt && hasParticipants) return false;
+
+      return true;
     });
 
     let deleted = 0;
     let errors = 0;
 
-    for (const appointment of expiredAvailableApts) {
+    for (const appointment of expiredAvailableAppts) {
       try {
         await dbService.deleteItem(
           appointment.PK,
