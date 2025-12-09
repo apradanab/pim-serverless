@@ -35,8 +35,27 @@ export const handler = async (event: {
       targetUserId = targetUser.cognitoId;
     }
 
-    const appointments = await dbService.queryByUserId(targetUserId);
-    return success(appointments);
+    const [ownerAppts, allAppts] = await Promise.all([
+      dbService.queryByUserId(targetUserId),
+      dbService.queryByType('Appointment')
+    ]);
+
+    const participantAppts = allAppts.filter(appt => {
+      const maxParticipants = appt.maxParticipants ?? 0;
+      if (!appt.participants || maxParticipants <= 1) return false;
+      return appt.participants.some(p => p.userId === targetUserId);
+    })
+
+    const combinedAppointments = [...ownerAppts, ...participantAppts];
+
+    const appointmentMap = new Map<string, Appointment>();
+
+    combinedAppointments.forEach((appt: Appointment) =>
+      appointmentMap.set(appt.appointmentId, appt)
+    );
+
+    const finalAppointments = Array.from(appointmentMap.values());
+    return success(finalAppointments);
 
   } catch (err) {
     console.error('Error fetching appointments', err);
