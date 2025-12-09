@@ -76,7 +76,6 @@ export const handler = async (event: {
         userEmail,
         userName: targetUser.name || userEmail.split('@')[0],
         joinedAt: new Date().toISOString(),
-        status: 'CONFIRMED' as const
       }
     ];
 
