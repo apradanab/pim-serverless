@@ -9,15 +9,26 @@ export const handler = async (): Promise<{ completed: number; errors: number }> 
     const now = new Date();
     const AllAppointments = await dbService.queryByType('Appointment');
 
-    const pastAppointments = AllAppointments.filter(apt => {
-      if(
-        apt.status !== AppointmentStatus.OCCUPIED ||
-        !apt.date ||
-        !apt.endTime
-      ) return false;
+    const pastAppointments = AllAppointments.filter(appt => {
+      if (appt.status === AppointmentStatus.COMPLETED ||
+          appt.status === AppointmentStatus.CANCELLED ||
+          appt.status === AppointmentStatus.PENDING ||
+          appt.status === AppointmentStatus.CANCELLATION_PENDING) return false;
 
-      const endDateTime = new Date(`${apt.date}T${apt.endTime}:00Z`);
-      return endDateTime < now;
+      const endDateTime = new Date(`${appt.date}T${appt.endTime}:00Z`);
+      if (endDateTime >= now) return false;
+
+      if (appt.status === AppointmentStatus.OCCUPIED) return true;
+
+      if (appt.status === AppointmentStatus.AVAILABLE) {
+        const maxParticipants = appt.maxParticipants ?? 0;
+        const isGroupAppt = maxParticipants > 1;
+        const hasParticipants = (appt.participants?.length ?? 0) > 0;
+
+        if (isGroupAppt && hasParticipants) return true;
+      }
+
+      return false
     });
 
     let completed = 0;
