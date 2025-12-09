@@ -20,7 +20,6 @@ export interface Appointment extends DynamoItem {
   maxParticipants?: number;
   status: AppointmentStatus;
   notes?: string;
-  adminNotes?: string;
   createdAt: string;
   requestedAt?: string;
 }
@@ -35,12 +34,7 @@ export interface CreateAppointmentInput {
 }
 
 export interface UpdateAppointmentInput extends Partial<Appointment> {
-  date?: string;
-  startTime?: string;
-  endTime?: string;
-  status?: AppointmentStatus;
   notes?: string;
-  adminNotes?: string;
 }
 
 export enum AppointmentStatus {
@@ -57,7 +51,6 @@ export interface UserParticipant {
   userEmail: string;
   userName: string;
   joinedAt: string;
-  status: 'CONFIRMED' | 'CANCELLED';
 }
 
 export type RequestAppointmentInput = Pick<Appointment, 'notes'>;
