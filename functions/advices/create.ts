@@ -68,13 +68,7 @@ export const handler = async (event: {
 
     await dbService.createItem(newAdvice);
 
-    return success({
-      message: 'Advice created successfully',
-      data: {
-        adviceId,
-        therapyId,
-      },
-    });
+    return success(newAdvice);
   } catch (err) {
     console.error('Error creating advice:', err);
     if (input.imageKey) {
