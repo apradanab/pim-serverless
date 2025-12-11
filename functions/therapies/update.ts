@@ -79,11 +79,16 @@ export const handler = async (event: {
       updateData
     )
 
+    const updatedTherapy = await dbService.getItem(
+      `THERAPY#${therapyId}`,
+      `THERAPY#${therapyId}`
+    )
+
     if (oldImageKey) {
       await mediaService.deleteMedia(oldImageKey).catch(error => console.error('Error deleting previous image:', error));
     }
 
-    return success({ message: 'Therapy updated successfully' });
+    return success(updatedTherapy);
   } catch (err) {
     console.error('Error updating therapy:', err);
 
